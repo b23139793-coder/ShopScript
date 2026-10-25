@@ -29,16 +29,16 @@ local _K = {
 }
 local _KF = "Tienx06_Auth.dat"
 local function _loadKey()
-	if type(isfile)=="function" and type(readfile)=="function" and isfile(_KF) then
-		local k = (readfile(_KF) or ""):match("^%s*(.-)%s*$")
-		if k and _K[k] then return true end
-	end
-	return false
+	return false -- luon nhap key moi lan
 end
 local function _saveKey(k)
-	if type(writefile)=="function" then pcall(writefile, _KF, k) end
+	-- khong luu key
 end
 
+pcall(function()
+	if type(isfolder)=="function" then end
+	if type(delfile)=="function" and type(isfile)=="function" and isfile(_KF) then delfile(_KF) end
+end)
 if not _loadKey() then
 	local done = false
 	local TweenService = game:GetService("TweenService")
@@ -204,7 +204,7 @@ if not _loadKey() then
 	local function tryKey()
 		local k = (box.Text or ""):match("^%s*(.-)%s*$")
 		if _K[k] then
-			_saveKey(k)
+			-- no save
 			status.TextColor3 = Color3.fromRGB(80,220,120)
 			status.Text = "Key hop le! Dang vao Hub..."
 			btn.Text = "THANH CONG"
@@ -1417,7 +1417,7 @@ local Theme = {
 	BgCard = Color3.fromRGB(23, 27, 38),
 	BgCardHover = Color3.fromRGB(29, 34, 48),
 	BgInput = Color3.fromRGB(15, 18, 26),
-	BgSidebar = Color3.fromRGB(15, 17, 25),
+	BgSidebar = Color3.fromRGB(22, 14, 16),
 	Accent = Color3.fromRGB(220, 40, 40),
 	AccentDark = Color3.fromRGB(160, 25, 25),
 	AccentGlow = Color3.fromRGB(255, 80, 80),
@@ -2118,7 +2118,7 @@ function Library:Window(winOpts)
 	local topBar = create("Frame", {
 		Name = "TopBar",
 		Size = UDim2.new(1, 0, 0, 46),
-		BackgroundColor3 = Theme.BgSecondary,
+		BackgroundColor3 = Color3.fromRGB(180, 30, 30),
 		BorderSizePixel = 0,
 		Parent = mainFrame,
 	})
@@ -2145,16 +2145,29 @@ function Library:Window(winOpts)
 	addStroke(logoImg, Theme.Accent, 1, 0.35)
 
 	local titleLabel = create("TextLabel", {
-		Position = UDim2.new(0, 50, 0, 6),
-		Size = UDim2.new(0, 260, 0, 18),
+		Position = UDim2.new(0, 14, 0, 6),
+		Size = UDim2.new(0, 280, 0, 20),
 		BackgroundTransparency = 1,
 		Font = Theme.FontBold,
-		Text = tostring(winOpts.Title or "Tiền x 06 Hub"),
-		TextColor3 = Theme.TextPrimary,
-		TextSize = 14,
+		Text = tostring(winOpts.Title or "Tiền × 06 Hub"),
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = topBar,
 	})
+	-- Badge VIET HOA like screenshot
+	local vietBadge = create("TextLabel", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -90, 0.5, 0),
+		Size = UDim2.new(0, 100, 0, 24),
+		BackgroundColor3 = Color3.fromRGB(255, 160, 0),
+		Font = Theme.FontBold,
+		Text = "VIỆT HÓA",
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 12,
+		Parent = topBar,
+	})
+	addCorner(vietBadge, 8)
 
 	local subLabel = create("TextLabel", {
 		Position = UDim2.new(0, 50, 0, 24),
@@ -2337,7 +2350,7 @@ function Library:Window(winOpts)
 			end
 		end
 		Library:Notify({
-			Title = "Tiền x 06 Hub 💰",
+			Title = "Tiền × 06 Hub",
 			Content = (langCode == "EN") and "🇺🇸 Switched language to English!" or "🇻🇳 Đã chuyển ngôn ngữ sang Tiếng Việt!",
 			Duration = 2.5,
 		})
