@@ -41,115 +41,189 @@ end
 
 if not _loadKey() then
 	local done = false
+	local TweenService = game:GetService("TweenService")
 	local cg = game:GetService("CoreGui")
 	local sg = Instance.new("ScreenGui")
 	sg.Name = "Tienx06_Key"
 	sg.IgnoreGuiInset = true
 	sg.ResetOnSpawn = false
+	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	pcall(function() sg.Parent = (gethui and gethui()) or cg end)
 	if not sg.Parent then sg.Parent = cg end
 
-	local bg = Instance.new("Frame")
-	bg.Size = UDim2.new(1,0,1,0)
-	bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
-	bg.BackgroundTransparency = 0.4
-	bg.BorderSizePixel = 0
-	bg.Parent = sg
+	-- Full dark blur overlay
+	local ov = Instance.new("Frame")
+	ov.Size = UDim2.new(1,0,1,0)
+	ov.BackgroundColor3 = Color3.fromRGB(5,5,10)
+	ov.BackgroundTransparency = 0.25
+	ov.BorderSizePixel = 0
+	ov.Parent = sg
 
+	-- Main card
 	local card = Instance.new("Frame")
 	card.AnchorPoint = Vector2.new(0.5,0.5)
 	card.Position = UDim2.new(0.5,0,0.5,0)
-	card.Size = UDim2.new(0,360,0,260)
-	card.BackgroundColor3 = Color3.fromRGB(18,20,28)
+	card.Size = UDim2.new(0,0,0,0)
+	card.BackgroundColor3 = Color3.fromRGB(14,12,16)
 	card.BorderSizePixel = 0
+	card.ClipsDescendants = true
 	card.Parent = sg
-	Instance.new("UICorner", card).CornerRadius = UDim.new(0,14)
-	local stroke = Instance.new("UIStroke", card)
-	stroke.Color = Color3.fromRGB(220,40,40)
-	stroke.Thickness = 1.5
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0,18)
 
-	local bar = Instance.new("Frame")
-	bar.Size = UDim2.new(1,0,0,3)
-	bar.BackgroundColor3 = Color3.fromRGB(220,40,40)
-	bar.BorderSizePixel = 0
-	bar.Parent = card
+	local cardStroke = Instance.new("UIStroke", card)
+	cardStroke.Color = Color3.fromRGB(220,40,40)
+	cardStroke.Thickness = 2
+	cardStroke.Transparency = 0.1
 
+	-- Top gradient bar
+	local topBar = Instance.new("Frame")
+	topBar.Size = UDim2.new(1,0,0,4)
+	topBar.BorderSizePixel = 0
+	topBar.Parent = card
+	local grad = Instance.new("UIGradient", topBar)
+	grad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(180,20,20)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,70,70)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255,120,60))
+	})
+
+	-- Soft red glow behind card
+	local glow = Instance.new("ImageLabel")
+	glow.AnchorPoint = Vector2.new(0.5,0.5)
+	glow.Position = UDim2.new(0.5,0,0.5,0)
+	glow.Size = UDim2.new(1,80,1,80)
+	glow.BackgroundTransparency = 1
+	glow.Image = "rbxassetid://5028857084"
+	glow.ImageColor3 = Color3.fromRGB(220,40,40)
+	glow.ImageTransparency = 0.75
+	glow.ZIndex = 0
+	glow.Parent = card
+
+	-- Title
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1,-30,0,30)
-	title.Position = UDim2.new(0,15,0,20)
+	title.Size = UDim2.new(1,-40,0,34)
+	title.Position = UDim2.new(0,20,0,28)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.Arcade
-	title.Text = "Tiền x 06 Hub 💰"
-	title.TextColor3 = Color3.fromRGB(255,70,70)
-	title.TextSize = 22
+	title.Text = "TIEN X 06 HUB"
+	title.TextColor3 = Color3.fromRGB(255,80,80)
+	title.TextSize = 26
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.Parent = card
 
+	local badge = Instance.new("Frame")
+	badge.Size = UDim2.new(0,64,0,22)
+	badge.Position = UDim2.new(1,-84,0,34)
+	badge.BackgroundColor3 = Color3.fromRGB(220,40,40)
+	badge.BackgroundTransparency = 0.15
+	badge.BorderSizePixel = 0
+	badge.Parent = card
+	Instance.new("UICorner", badge).CornerRadius = UDim.new(0,6)
+	local badgeTxt = Instance.new("TextLabel")
+	badgeTxt.Size = UDim2.new(1,0,1,0)
+	badgeTxt.BackgroundTransparency = 1
+	badgeTxt.Font = Enum.Font.Arcade
+	badgeTxt.Text = "KEY"
+	badgeTxt.TextColor3 = Color3.fromRGB(255,255,255)
+	badgeTxt.TextSize = 12
+	badgeTxt.Parent = badge
+
 	local sub = Instance.new("TextLabel")
-	sub.Size = UDim2.new(1,-30,0,20)
-	sub.Position = UDim2.new(0,15,0,52)
+	sub.Size = UDim2.new(1,-40,0,20)
+	sub.Position = UDim2.new(0,20,0,66)
 	sub.BackgroundTransparency = 1
 	sub.Font = Enum.Font.Arcade
-	sub.Text = "Nhập Key để tiếp tục (1 thiết bị)"
-	sub.TextColor3 = Color3.fromRGB(160,170,185)
+	sub.Text = "Nhap key de mo khoa  •  1 thiet bi"
+	sub.TextColor3 = Color3.fromRGB(160,140,140)
 	sub.TextSize = 13
 	sub.TextXAlignment = Enum.TextXAlignment.Left
 	sub.Parent = card
 
+	-- Input
+	local boxHold = Instance.new("Frame")
+	boxHold.Size = UDim2.new(1,-40,0,50)
+	boxHold.Position = UDim2.new(0,20,0,105)
+	boxHold.BackgroundColor3 = Color3.fromRGB(28,18,20)
+	boxHold.BorderSizePixel = 0
+	boxHold.Parent = card
+	Instance.new("UICorner", boxHold).CornerRadius = UDim.new(0,12)
+	local boxSt = Instance.new("UIStroke", boxHold)
+	boxSt.Color = Color3.fromRGB(80,30,30)
+	boxSt.Thickness = 1.2
+
 	local box = Instance.new("TextBox")
-	box.Size = UDim2.new(1,-40,0,42)
-	box.Position = UDim2.new(0,20,0,90)
-	box.BackgroundColor3 = Color3.fromRGB(30,34,46)
-	box.BorderSizePixel = 0
+	box.Size = UDim2.new(1,-24,1,0)
+	box.Position = UDim2.new(0,12,0,0)
+	box.BackgroundTransparency = 1
 	box.Font = Enum.Font.Arcade
 	box.PlaceholderText = "Fish-XXXXXXXX"
+	box.PlaceholderColor3 = Color3.fromRGB(100,70,70)
 	box.Text = ""
-	box.TextColor3 = Color3.fromRGB(240,245,255)
-	box.TextSize = 15
+	box.TextColor3 = Color3.fromRGB(255,230,230)
+	box.TextSize = 16
+	box.TextXAlignment = Enum.TextXAlignment.Left
 	box.ClearTextOnFocus = false
-	box.Parent = card
-	Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
+	box.Parent = boxHold
 
 	local status = Instance.new("TextLabel")
 	status.Size = UDim2.new(1,-40,0,18)
-	status.Position = UDim2.new(0,20,0,140)
+	status.Position = UDim2.new(0,20,0,165)
 	status.BackgroundTransparency = 1
 	status.Font = Enum.Font.Arcade
 	status.Text = ""
-	status.TextColor3 = Color3.fromRGB(231,76,60)
+	status.TextColor3 = Color3.fromRGB(255,80,80)
 	status.TextSize = 12
 	status.TextXAlignment = Enum.TextXAlignment.Left
 	status.Parent = card
 
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1,-40,0,42)
-	btn.Position = UDim2.new(0,20,0,175)
-	btn.BackgroundColor3 = Color3.fromRGB(200,40,40)
+	btn.Size = UDim2.new(1,-40,0,48)
+	btn.Position = UDim2.new(0,20,0,195)
+	btn.BackgroundColor3 = Color3.fromRGB(200,35,35)
 	btn.BorderSizePixel = 0
 	btn.Font = Enum.Font.Arcade
-	btn.Text = "Xác nhận"
+	btn.Text = "XAC NHAN KEY  →"
 	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.TextSize = 15
+	btn.TextSize = 16
+	btn.AutoButtonColor = false
 	btn.Parent = card
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,12)
+
+	btn.MouseEnter:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255,55,55)}):Play()
+	end)
+	btn.MouseLeave:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(200,35,35)}):Play()
+	end)
+
+	-- Open animation
+	TweenService:Create(card, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, 380, 0, 270)
+	}):Play()
 
 	local function tryKey()
 		local k = (box.Text or ""):match("^%s*(.-)%s*$")
 		if _K[k] then
 			_saveKey(k)
-			status.TextColor3 = Color3.fromRGB(46,204,113)
-			status.Text = "Key hợp lệ! Đang vào..."
-			task.wait(0.5)
+			status.TextColor3 = Color3.fromRGB(80,220,120)
+			status.Text = "Key hop le! Dang vao Hub..."
+			btn.Text = "THANH CONG"
+			btn.BackgroundColor3 = Color3.fromRGB(40,160,80)
+			task.wait(0.55)
 			sg:Destroy()
 			done = true
 		else
-			status.Text = "Key không đúng"
+			status.TextColor3 = Color3.fromRGB(255,70,70)
+			status.Text = "Key khong dung • Thu lai"
+			TweenService:Create(boxHold, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(50,15,18)}):Play()
+			task.wait(0.5)
+			TweenService:Create(boxHold, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(28,18,20)}):Play()
 		end
 	end
 	btn.MouseButton1Click:Connect(tryKey)
-	box.FocusLost:Connect(function(enter) if enter then tryKey() end end)
+	box.FocusLost:Connect(function(e) if e then tryKey() end end)
 
-	repeat task.wait(0.15) until done
+	repeat task.wait(0.12) until done
 end
 
 -- ============================================================================
@@ -832,7 +906,8 @@ local __Tienx06_VI = {
 ["Monster Order"] = "Thứ Tự Đánh Quái",
 ["Closest"] = "Gần Nhất (Closest)",
 ["Most Tokens"] = "Nhiều Token Nhất (Most Tokens)",
-["Auto Pumpkin Moon"] = "Tự Động Trăng Bí Ngô (Pumpkin Moon)",
+["Auto Pumpkin Moon"] = "Tự Động Pumpkin King / Trăng Bí Ngô",
+["Auto Pumpkin King"] = "Tự Động Pumpkin King / Trăng Bí Ngô",
 ["Auto Buy Halloween Dimension Egg"] = "Tự Động Mua Trứng Halloween Dimension",
 ["Ghost Dog Status"] = "Trạng Thái Chó Ma & Câu Cá",
 ["Auto Ghost Dog Quest"] = "Tự Động Nhiệm Vụ Chó Ma (Ghost Dog)",
@@ -1894,9 +1969,9 @@ function Library:Window(winOpts)
 	local floatBtn = create("TextButton", {
 		Name = "FloatingToggle",
 		Position = UDim2.new(0, 16, 0.5, -24),
-		Size = UDim2.new(0, 52, 0, 52),
+		Size = UDim2.new(0, 48, 0, 48),
 		BackgroundColor3 = Theme.BgSecondary,
-		BackgroundTransparency = 0.35,
+		BackgroundTransparency = 0.4,
 		Text = "",
 		AutoButtonColor = false,
 		ZIndex = 200,
@@ -1908,7 +1983,7 @@ function Library:Window(winOpts)
 	local floatIcon = create("ImageLabel", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0, 72, 0, 72),
+		Size = UDim2.new(0, 96, 0, 96),
 		BackgroundTransparency = 1,
 		Image = "rbxassetid://136001662391785",
 		ScaleType = Enum.ScaleType.Fit,
@@ -28806,7 +28881,7 @@ return false;
 end);
 Q[1].BatIds=FW;
 Q[1].ToolIds=eW;
-Q[31]=(c:CreateToggle({Name="Auto Pumpkin Moon",Default=true,Callback=NW}));
+Q[31]=(c:CreateToggle({Name="Auto Pumpkin King",Default=true,Callback=NW}));
 Q[1].Pumpkin_=Q[31];
 Q[1].PumpkinSpeed=300;
 c:CreateSlider({Name="Walk Speed",Min=100,Max=1000,Default=300,AllowDecimals=false,Increment=10,Unit=" st/s",Quick=false,Callback=function(j)local QW={};
