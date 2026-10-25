@@ -1,3 +1,165 @@
+
+-- ============================================================================
+-- Tiền x 06 Hub 💰 | Key System (100 keys - 1 device)
+-- ============================================================================
+local VALID_KEYS = {
+	["Fish-A7K9M2QX"]=true,["Fish-B4N8T6LP"]=true,["Fish-C3R5W9HJ"]=true,["Fish-D8F2K7VN"]=true,
+	["Fish-E6M4P9XZ"]=true,["Fish-F2Q8L5RT"]=true,["Fish-G9H3N6KW"]=true,["Fish-H5V7C2MP"]=true,
+	["Fish-J4X9R6BN"]=true,["Fish-K8T2W5QZ"]=true,["Fish-L3P7M4HJ"]=true,["Fish-M6N9K2XV"]=true,
+	["Fish-N5R4T8QC"]=true,["Fish-P7W3H6LK"]=true,["Fish-Q2Z8V5MN"]=true,["Fish-R9C4X7TP"]=true,
+	["Fish-S6K2J8WH"]=true,["Fish-T3M5Q9VX"]=true,["Fish-V8L4N2RK"]=true,["Fish-W7H6P3CZ"]=true,
+	["Fish-X5Q9T4MJ"]=true,["Fish-Y2N8K6VP"]=true,["Fish-Z4R7C3HL"]=true,["Fish-2K9M5XQW"]=true,
+	["Fish-3V6P8NRT"]=true,["Fish-4H2J7KMC"]=true,["Fish-5Q8W3LNZ"]=true,["Fish-6T4X9RVP"]=true,
+	["Fish-7M3C5HJK"]=true,["Fish-8N6V2QWL"]=true,["Fish-9P5R7TXM"]=true,["Fish-A2V8K4NJ"]=true,
+	["Fish-B6Q3M9XL"]=true,["Fish-C7T5H2RW"]=true,["Fish-D4N8P6VK"]=true,["Fish-E9X2L7QM"]=true,
+	["Fish-F5J3R8WN"]=true,["Fish-G2K6V4TP"]=true,["Fish-H8M9Q5XC"]=true,["Fish-J7L4N2RV"]=true,
+	["Fish-K3W6P9HZ"]=true,["Fish-L9R2X5MC"]=true,["Fish-M4T8Q7VN"]=true,["Fish-N6C3K9WL"]=true,
+	["Fish-P2H5V8RX"]=true,["Fish-Q7M4J3TZ"]=true,["Fish-R5N9W2KC"]=true,["Fish-S8X6L4VP"]=true,
+	["Fish-T2Q7M5HN"]=true,["Fish-V4K9R3XC"]=true,["Fish-W6P2N8TJ"]=true,["Fish-X3H7Q5MV"]=true,
+	["Fish-Y9L4C2RK"]=true,["Fish-Z5T8N6WP"]=true,["Fish-2M7V4QXC"]=true,["Fish-3K5R9HNW"]=true,
+	["Fish-4P8T2LJM"]=true,["Fish-5X6N3VQK"]=true,["Fish-6C9W4RHT"]=true,["Fish-7Q2M8PXL"]=true,
+	["Fish-8R5K3NVC"]=true,["Fish-9T4H7WQM"]=true,["Fish-A5N2X8RL"]=true,["Fish-B9V4K6TP"]=true,
+	["Fish-C2M7Q5WX"]=true,["Fish-D6R3N8HJ"]=true,["Fish-E4K9T2VP"]=true,["Fish-F8W5L3QM"]=true,
+	["Fish-G6P2X9RN"]=true,["Fish-H3T7K4VC"]=true,["Fish-J9M5Q2WL"]=true,["Fish-K2R8N6XP"]=true,
+	["Fish-L5V3H9QT"]=true,["Fish-M8Q4W2KC"]=true,["Fish-N3X7P5RL"]=true,["Fish-P9H2T6VM"]=true,
+	["Fish-Q4K8R3WX"]=true,["Fish-R2V6M9TN"]=true,["Fish-S5L3Q8KP"]=true,["Fish-T9N4X2HC"]=true,
+	["Fish-V3W7K5QM"]=true,["Fish-W8R2P6LX"]=true,["Fish-X4M9T3VK"]=true,["Fish-Y6Q2N8RP"]=true,
+	["Fish-Z3H5W7KC"]=true,["Fish-2N8X4MQL"]=true,["Fish-3R6V9TPK"]=true,["Fish-4W2K7HNX"]=true,
+	["Fish-5M9Q3VCL"]=true,["Fish-6P4T8RJK"]=true,["Fish-7X3N5WQM"]=true,["Fish-8K6H2VRT"]=true,
+	["Fish-9C5M7PXL"]=true,["Fish-A8R3T6QN"]=true,["Fish-B2W9K5MV"]=true,["Fish-C5L7X3RP"]=true,
+	["Fish-D9Q4N2WK"]=true,["Fish-E3V6M8HT"]=true,["Fish-F7K2R5XN"]=true,["Fish-G4P9W3LC"]=true,
+	["Fish-H6N2T8QV"]=true,["Fish-J5X3M7RK"]=true,
+}
+
+local KEY_FILE = "Tienx06_Key.txt"
+local function getSavedKey()
+	if type(isfile) == "function" and type(readfile) == "function" and isfile(KEY_FILE) then
+		local k = tostring(readfile(KEY_FILE) or ""):match("^%s*(.-)%s*$")
+		if k and VALID_KEYS[k] then return k end
+	end
+	return nil
+end
+
+local function saveKey(k)
+	if type(writefile) == "function" then
+		pcall(writefile, KEY_FILE, k)
+	end
+end
+
+local function showKeyUI(onSuccess)
+	local cg = game:GetService("CoreGui")
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "Tienx06_KeyUI"
+	gui.ResetOnSpawn = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	pcall(function() gui.Parent = (gethui and gethui()) or cg end)
+	if not gui.Parent then gui.Parent = cg end
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 340, 0, 220)
+	frame.Position = UDim2.new(0.5, -170, 0.5, -110)
+	frame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+	frame.BorderSizePixel = 0
+	frame.Parent = gui
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+	local stroke = Instance.new("UIStroke", frame)
+	stroke.Color = Color3.fromRGB(0, 195, 255)
+	stroke.Thickness = 1.5
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, -20, 0, 36)
+	title.Position = UDim2.new(0, 10, 0, 12)
+	title.BackgroundTransparency = 1
+	title.Font = Enum.Font.GothamBlack
+	title.Text = "Tiền x 06 Hub 💰"
+	title.TextColor3 = Color3.fromRGB(0, 195, 255)
+	title.TextSize = 20
+	title.Parent = frame
+
+	local sub = Instance.new("TextLabel")
+	sub.Size = UDim2.new(1, -20, 0, 22)
+	sub.Position = UDim2.new(0, 10, 0, 48)
+	sub.BackgroundTransparency = 1
+	sub.Font = Enum.Font.Gotham
+	sub.Text = "Nhập Key để sử dụng (1 thiết bị)"
+	sub.TextColor3 = Color3.fromRGB(180, 180, 190)
+	sub.TextSize = 13
+	sub.Parent = frame
+
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(1, -40, 0, 40)
+	box.Position = UDim2.new(0, 20, 0, 85)
+	box.BackgroundColor3 = Color3.fromRGB(30, 32, 42)
+	box.BorderSizePixel = 0
+	box.Font = Enum.Font.Gotham
+	box.PlaceholderText = "Fish-XXXXXXXX"
+	box.Text = ""
+	box.TextColor3 = Color3.fromRGB(240, 240, 245)
+	box.TextSize = 15
+	box.ClearTextOnFocus = false
+	box.Parent = frame
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+
+	local status = Instance.new("TextLabel")
+	status.Size = UDim2.new(1, -20, 0, 20)
+	status.Position = UDim2.new(0, 10, 0, 132)
+	status.BackgroundTransparency = 1
+	status.Font = Enum.Font.Gotham
+	status.Text = ""
+	status.TextColor3 = Color3.fromRGB(231, 76, 60)
+	status.TextSize = 12
+	status.Parent = frame
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -40, 0, 38)
+	btn.Position = UDim2.new(0, 20, 0, 160)
+	btn.BackgroundColor3 = Color3.fromRGB(0, 160, 220)
+	btn.BorderSizePixel = 0
+	btn.Font = Enum.Font.GothamBold
+	btn.Text = "Xác nhận Key"
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 15
+	btn.AutoButtonColor = true
+	btn.Parent = frame
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+	local function tryKey()
+		local k = tostring(box.Text or ""):match("^%s*(.-)%s*$")
+		if VALID_KEYS[k] then
+			saveKey(k)
+			status.TextColor3 = Color3.fromRGB(46, 204, 113)
+			status.Text = "✅ Key hợp lệ! Đang vào Hub..."
+			task.wait(0.6)
+			gui:Destroy()
+			onSuccess()
+		else
+			status.TextColor3 = Color3.fromRGB(231, 76, 60)
+			status.Text = "❌ Key không đúng. Thử lại."
+		end
+	end
+
+	btn.MouseButton1Click:Connect(tryKey)
+	box.FocusLost:Connect(function(enter)
+		if enter then tryKey() end
+	end)
+end
+
+-- Check key before loading main script
+local saved = getSavedKey()
+if saved then
+	-- Key already saved on this device, continue
+else
+	-- Need to show key UI and wait
+	local passed = false
+	showKeyUI(function()
+		passed = true
+	end)
+	repeat task.wait(0.2) until passed
+end
+
+-- ============================================================================
+-- Main Script continues below
+-- ============================================================================
 -- ============================================================================
 -- Tiền x 06 Hub 💰 | Steal An Egg (PlaceId: 107778070777162)
 -- 100% Standalone Tiền x 06 Hub Script | Tự Động Lưu Cài Đặt
@@ -1080,8 +1242,8 @@ local Theme = {
 	TextMuted = Color3.fromRGB(108, 117, 138),
 	Border = Color3.fromRGB(38, 45, 64),
 	BorderAccent = Color3.fromRGB(0, 175, 235),
-	FontBold = Enum.Font.GothamBold,
-	FontSemi = Enum.Font.GothamSemibold,
+	FontBold = Enum.Font.GothamBlack,
+	FontSemi = Enum.Font.GothamBold,
 	FontReg = Enum.Font.Gotham,
 }
 
@@ -1719,6 +1881,7 @@ function Library:Window(winOpts)
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		Size = UDim2.new(0, winW, 0, winH),
 		BackgroundColor3 = Theme.BgPrimary,
+		BackgroundTransparency = 0.15,
 		ClipsDescendants = true,
 		Parent = screenGui,
 	})
@@ -1732,7 +1895,7 @@ function Library:Window(winOpts)
 		BackgroundTransparency = 1,
 		Image = "rbxassetid://111166662594854",
 		ScaleType = Enum.ScaleType.Crop,
-		ImageTransparency = 0.4,
+		ImageTransparency = 0.25,
 		ZIndex = 0,
 		Parent = mainFrame,
 	})
@@ -1740,16 +1903,17 @@ function Library:Window(winOpts)
 	-- Floating Toggle Button (Draggable, always accessible on PC & Mobile)
 	local floatBtn = create("TextButton", {
 		Name = "FloatingToggle",
-		Position = UDim2.new(0, 16, 0.5, -24),
-		Size = UDim2.new(0, 48, 0, 48),
+		Position = UDim2.new(0, 16, 0.5, -28),
+		Size = UDim2.new(0, 56, 0, 56),
 		BackgroundColor3 = Theme.BgSecondary,
+		BackgroundTransparency = 0.1,
 		Text = "",
 		AutoButtonColor = false,
 		ZIndex = 200,
 		Parent = screenGui,
 	})
-	addCorner(floatBtn, 12)
-	addStroke(floatBtn, Theme.Accent, 1.5, 0.15)
+	addCorner(floatBtn, 28)  -- full circle
+	addStroke(floatBtn, Theme.Accent, 2, 0.1)
 
 	local floatIcon = create("ImageLabel", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
