@@ -226,6 +226,283 @@ if not _loadKey() then
 	repeat task.wait(0.12) until done
 end
 
+
+-- ===== Tiền x 06 Extra HUD: WalkSpeed + FPS/MS/IP =====
+task.spawn(function()
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local Stats = game:GetService("Stats")
+	local LP = Players.LocalPlayer
+	local cg = game:GetService("CoreGui")
+
+	local function parentGui(g)
+		pcall(function() g.Parent = (gethui and gethui()) or cg end)
+		if not g.Parent then g.Parent = cg end
+	end
+
+	-- Remove old
+	pcall(function()
+		for _, r in ipairs({cg, gethui and gethui()}) do
+			if r then
+				for _, c in ipairs(r:GetChildren()) do
+					if c.Name == "Tienx06_HUD" or c.Name == "Tienx06_SpeedUI" then pcall(c.Destroy, c) end
+				end
+			end
+		end
+	end)
+
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "Tienx06_HUD"
+	sg.ResetOnSpawn = false
+	sg.IgnoreGuiInset = true
+	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	parentGui(sg)
+
+	-- Stats bar (top left)
+	local stats = Instance.new("Frame")
+	stats.Name = "StatsBar"
+	stats.Position = UDim2.new(0, 12, 0, 12)
+	stats.Size = UDim2.new(0, 210, 0, 72)
+	stats.BackgroundColor3 = Color3.fromRGB(16, 12, 14)
+	stats.BackgroundTransparency = 0.2
+	stats.BorderSizePixel = 0
+	stats.Parent = sg
+	Instance.new("UICorner", stats).CornerRadius = UDim.new(0, 10)
+	local stStroke = Instance.new("UIStroke", stats)
+	stStroke.Color = Color3.fromRGB(220, 40, 40)
+	stStroke.Thickness = 1.2
+
+	local fpsLbl = Instance.new("TextLabel")
+	fpsLbl.Size = UDim2.new(1, -12, 0, 20)
+	fpsLbl.Position = UDim2.new(0, 8, 0, 6)
+	fpsLbl.BackgroundTransparency = 1
+	fpsLbl.Font = Enum.Font.Arcade
+	fpsLbl.Text = "FPS: --"
+	fpsLbl.TextColor3 = Color3.fromRGB(100, 255, 140)
+	fpsLbl.TextSize = 14
+	fpsLbl.TextXAlignment = Enum.TextXAlignment.Left
+	fpsLbl.Parent = stats
+
+	local msLbl = Instance.new("TextLabel")
+	msLbl.Size = UDim2.new(1, -12, 0, 20)
+	msLbl.Position = UDim2.new(0, 8, 0, 26)
+	msLbl.BackgroundTransparency = 1
+	msLbl.Font = Enum.Font.Arcade
+	msLbl.Text = "MS: --"
+	msLbl.TextColor3 = Color3.fromRGB(100, 200, 255)
+	msLbl.TextSize = 14
+	msLbl.TextXAlignment = Enum.TextXAlignment.Left
+	msLbl.Parent = stats
+
+	local ipLbl = Instance.new("TextLabel")
+	ipLbl.Size = UDim2.new(1, -12, 0, 20)
+	ipLbl.Position = UDim2.new(0, 8, 0, 46)
+	ipLbl.BackgroundTransparency = 1
+	ipLbl.Font = Enum.Font.Arcade
+	ipLbl.Text = "IP: Dang doan..."
+	ipLbl.TextColor3 = Color3.fromRGB(255, 180, 100)
+	ipLbl.TextSize = 13
+	ipLbl.TextXAlignment = Enum.TextXAlignment.Left
+	ipLbl.Parent = stats
+
+	-- FPS / MS loop
+	local frames = 0
+	local last = tick()
+	RunService.RenderStepped:Connect(function()
+		frames = frames + 1
+		local now = tick()
+		if now - last >= 1 then
+			fpsLbl.Text = "FPS: " .. tostring(frames)
+			frames = 0
+			last = now
+			local ping = 0
+			pcall(function()
+				ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+			end)
+			msLbl.Text = "MS: " .. tostring(ping) .. " ms"
+			if ping < 80 then
+				msLbl.TextColor3 = Color3.fromRGB(100, 255, 140)
+			elseif ping < 150 then
+				msLbl.TextColor3 = Color3.fromRGB(255, 220, 80)
+			else
+				msLbl.TextColor3 = Color3.fromRGB(255, 90, 90)
+			end
+		end
+	end)
+
+	-- Guess / fetch IP (public IP via available APIs)
+	task.spawn(function()
+		local ip = "Khong lay duoc"
+		local urls = {
+			"https://api.ipify.org",
+			"https://ifconfig.me/ip",
+			"https://icanhazip.com",
+		}
+		for _, url in ipairs(urls) do
+			local ok, res = pcall(function()
+				return game:HttpGet(url, true)
+			end)
+			if ok and type(res) == "string" then
+				local cleaned = res:match("(%d+%.%d+%.%d+%.%d+)")
+				if cleaned then
+					ip = cleaned
+					break
+				end
+			end
+		end
+		-- Device hint (phone vs pc - rough)
+		local device = "PC"
+		pcall(function()
+			local UIS = game:GetService("UserInputService")
+			if UIS.TouchEnabled and not UIS.KeyboardEnabled then
+				device = "Dien thoai"
+			elseif UIS.TouchEnabled then
+				device = "Tablet/Phone"
+			end
+		end)
+		ipLbl.Text = "IP: " .. ip .. " (" .. device .. ")"
+	end)
+
+	-- ===== WalkSpeed separate UI =====
+	local speedGui = Instance.new("Frame")
+	speedGui.Name = "SpeedPanel"
+	speedGui.Position = UDim2.new(0, 12, 0, 94)
+	speedGui.Size = UDim2.new(0, 210, 0, 100)
+	speedGui.BackgroundColor3 = Color3.fromRGB(16, 12, 14)
+	speedGui.BackgroundTransparency = 0.2
+	speedGui.BorderSizePixel = 0
+	speedGui.Parent = sg
+	Instance.new("UICorner", speedGui).CornerRadius = UDim.new(0, 10)
+	local spStroke = Instance.new("UIStroke", speedGui)
+	spStroke.Color = Color3.fromRGB(220, 40, 40)
+	spStroke.Thickness = 1.2
+
+	local spTitle = Instance.new("TextLabel")
+	spTitle.Size = UDim2.new(1, -12, 0, 22)
+	spTitle.Position = UDim2.new(0, 8, 0, 6)
+	spTitle.BackgroundTransparency = 1
+	spTitle.Font = Enum.Font.Arcade
+	spTitle.Text = "WALK SPEED"
+	spTitle.TextColor3 = Color3.fromRGB(255, 90, 90)
+	spTitle.TextSize = 14
+	spTitle.TextXAlignment = Enum.TextXAlignment.Left
+	spTitle.Parent = speedGui
+
+	local valLbl = Instance.new("TextLabel")
+	valLbl.Size = UDim2.new(0, 60, 0, 22)
+	valLbl.Position = UDim2.new(1, -68, 0, 6)
+	valLbl.BackgroundTransparency = 1
+	valLbl.Font = Enum.Font.Arcade
+	valLbl.Text = "16"
+	valLbl.TextColor3 = Color3.fromRGB(255, 220, 220)
+	valLbl.TextSize = 14
+	valLbl.TextXAlignment = Enum.TextXAlignment.Right
+	valLbl.Parent = speedGui
+
+	-- Slider track
+	local track = Instance.new("Frame")
+	track.Size = UDim2.new(1, -24, 0, 8)
+	track.Position = UDim2.new(0, 12, 0, 42)
+	track.BackgroundColor3 = Color3.fromRGB(40, 25, 28)
+	track.BorderSizePixel = 0
+	track.Parent = speedGui
+	Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.new(16/1000, 0, 1, 0)
+	fill.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+	fill.BorderSizePixel = 0
+	fill.Parent = track
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+	local knob = Instance.new("TextButton")
+	knob.Size = UDim2.new(0, 16, 0, 16)
+	knob.Position = UDim2.new(16/1000, -8, 0.5, -8)
+	knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	knob.Text = ""
+	knob.BorderSizePixel = 0
+	knob.AutoButtonColor = false
+	knob.Parent = track
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+
+	local dragging = false
+	local currentSpeed = 16
+
+	local function applySpeed(v)
+		currentSpeed = math.clamp(math.floor(v + 0.5), 0, 1000)
+		valLbl.Text = tostring(currentSpeed)
+		local pct = currentSpeed / 1000
+		fill.Size = UDim2.new(pct, 0, 1, 0)
+		knob.Position = UDim2.new(pct, -8, 0.5, -8)
+		pcall(function()
+			local char = LP.Character
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.WalkSpeed = currentSpeed
+			end
+		end)
+	end
+
+	local function updateFromX(x)
+		local rel = math.clamp((x - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+		applySpeed(rel * 1000)
+	end
+
+	knob.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+		end
+	end)
+	track.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			updateFromX(input.Position.X)
+		end
+	end)
+	game:GetService("UserInputService").InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = false
+		end
+	end)
+	game:GetService("UserInputService").InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			updateFromX(input.Position.X)
+		end
+	end)
+
+	-- Keep speed applied (some games reset WalkSpeed)
+	RunService.Heartbeat:Connect(function()
+		pcall(function()
+			local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+			if hum and math.abs(hum.WalkSpeed - currentSpeed) > 1 and currentSpeed > 0 then
+				hum.WalkSpeed = currentSpeed
+			end
+		end)
+	end)
+
+	-- Preset buttons
+	local function makeBtn(text, x, speed)
+		local b = Instance.new("TextButton")
+		b.Size = UDim2.new(0, 44, 0, 24)
+		b.Position = UDim2.new(0, x, 0, 64)
+		b.BackgroundColor3 = Color3.fromRGB(40, 22, 24)
+		b.BorderSizePixel = 0
+		b.Font = Enum.Font.Arcade
+		b.Text = text
+		b.TextColor3 = Color3.fromRGB(255, 200, 200)
+		b.TextSize = 11
+		b.Parent = speedGui
+		Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+		b.MouseButton1Click:Connect(function() applySpeed(speed) end)
+	end
+	makeBtn("16", 12, 16)
+	makeBtn("50", 60, 50)
+	makeBtn("100", 108, 100)
+	makeBtn("500", 156, 500)
+end)
+
+
+
 -- ============================================================================
 -- Tiền x 06 Hub 💰 | Steal An Egg (PlaceId: 107778070777162)
 -- 100% Standalone Tiền x 06 Hub Script | Tự Động Lưu Cài Đặt
@@ -1969,9 +2246,9 @@ function Library:Window(winOpts)
 	local floatBtn = create("TextButton", {
 		Name = "FloatingToggle",
 		Position = UDim2.new(0, 16, 0.5, -24),
-		Size = UDim2.new(0, 48, 0, 48),
+		Size = UDim2.new(0, 46, 0, 46),
 		BackgroundColor3 = Theme.BgSecondary,
-		BackgroundTransparency = 0.4,
+		BackgroundTransparency = 0.2,
 		Text = "",
 		AutoButtonColor = false,
 		ZIndex = 200,
@@ -1983,7 +2260,7 @@ function Library:Window(winOpts)
 	local floatIcon = create("ImageLabel", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0, 96, 0, 96),
+		Size = UDim2.new(0, 42, 0, 42),
 		BackgroundTransparency = 1,
 		Image = "rbxassetid://136001662391785",
 		ScaleType = Enum.ScaleType.Fit,
