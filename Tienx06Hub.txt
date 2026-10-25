@@ -227,7 +227,8 @@ if not _loadKey() then
 end
 
 
--- ===== Tiền x 06 Extra HUD: WalkSpeed + FPS/MS/IP =====
+
+-- ===== Tiền x 06 Extra HUD: FPS / MS / IP (top center) =====
 task.spawn(function()
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
@@ -240,7 +241,6 @@ task.spawn(function()
 		if not g.Parent then g.Parent = cg end
 	end
 
-	-- Remove old
 	pcall(function()
 		for _, r in ipairs({cg, gethui and gethui()}) do
 			if r then
@@ -258,54 +258,46 @@ task.spawn(function()
 	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	parentGui(sg)
 
-	-- Stats bar (top left)
+	-- Top center stats bar
 	local stats = Instance.new("Frame")
 	stats.Name = "StatsBar"
-	stats.Position = UDim2.new(0, 12, 0, 12)
-	stats.Size = UDim2.new(0, 210, 0, 72)
+	stats.AnchorPoint = Vector2.new(0.5, 0)
+	stats.Position = UDim2.new(0.5, 0, 0, 8)
+	stats.Size = UDim2.new(0, 320, 0, 28)
 	stats.BackgroundColor3 = Color3.fromRGB(16, 12, 14)
-	stats.BackgroundTransparency = 0.2
+	stats.BackgroundTransparency = 0.25
 	stats.BorderSizePixel = 0
 	stats.Parent = sg
-	Instance.new("UICorner", stats).CornerRadius = UDim.new(0, 10)
+	Instance.new("UICorner", stats).CornerRadius = UDim.new(0, 8)
 	local stStroke = Instance.new("UIStroke", stats)
 	stStroke.Color = Color3.fromRGB(220, 40, 40)
-	stStroke.Thickness = 1.2
+	stStroke.Thickness = 1
 
-	local fpsLbl = Instance.new("TextLabel")
-	fpsLbl.Size = UDim2.new(1, -12, 0, 20)
-	fpsLbl.Position = UDim2.new(0, 8, 0, 6)
-	fpsLbl.BackgroundTransparency = 1
-	fpsLbl.Font = Enum.Font.Arcade
-	fpsLbl.Text = "FPS: --"
-	fpsLbl.TextColor3 = Color3.fromRGB(100, 255, 140)
-	fpsLbl.TextSize = 14
-	fpsLbl.TextXAlignment = Enum.TextXAlignment.Left
-	fpsLbl.Parent = stats
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, 16)
+	layout.Parent = stats
 
-	local msLbl = Instance.new("TextLabel")
-	msLbl.Size = UDim2.new(1, -12, 0, 20)
-	msLbl.Position = UDim2.new(0, 8, 0, 26)
-	msLbl.BackgroundTransparency = 1
-	msLbl.Font = Enum.Font.Arcade
-	msLbl.Text = "MS: --"
-	msLbl.TextColor3 = Color3.fromRGB(100, 200, 255)
-	msLbl.TextSize = 14
-	msLbl.TextXAlignment = Enum.TextXAlignment.Left
-	msLbl.Parent = stats
+	local function makeLbl(name, color)
+		local l = Instance.new("TextLabel")
+		l.Name = name
+		l.Size = UDim2.new(0, 90, 1, 0)
+		l.BackgroundTransparency = 1
+		l.Font = Enum.Font.Arcade
+		l.Text = name .. ": --"
+		l.TextColor3 = color
+		l.TextSize = 13
+		l.Parent = stats
+		return l
+	end
 
-	local ipLbl = Instance.new("TextLabel")
-	ipLbl.Size = UDim2.new(1, -12, 0, 20)
-	ipLbl.Position = UDim2.new(0, 8, 0, 46)
-	ipLbl.BackgroundTransparency = 1
-	ipLbl.Font = Enum.Font.Arcade
-	ipLbl.Text = "IP: Dang doan..."
-	ipLbl.TextColor3 = Color3.fromRGB(255, 180, 100)
-	ipLbl.TextSize = 13
-	ipLbl.TextXAlignment = Enum.TextXAlignment.Left
-	ipLbl.Parent = stats
+	local fpsLbl = makeLbl("FPS", Color3.fromRGB(100, 255, 140))
+	local msLbl = makeLbl("MS", Color3.fromRGB(100, 200, 255))
+	local ipLbl = makeLbl("IP", Color3.fromRGB(255, 180, 100))
+	ipLbl.Size = UDim2.new(0, 150, 1, 0)
 
-	-- FPS / MS loop
 	local frames = 0
 	local last = tick()
 	RunService.RenderStepped:Connect(function()
@@ -319,7 +311,7 @@ task.spawn(function()
 			pcall(function()
 				ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
 			end)
-			msLbl.Text = "MS: " .. tostring(ping) .. " ms"
+			msLbl.Text = "MS: " .. tostring(ping)
 			if ping < 80 then
 				msLbl.TextColor3 = Color3.fromRGB(100, 255, 140)
 			elseif ping < 150 then
@@ -330,176 +322,27 @@ task.spawn(function()
 		end
 	end)
 
-	-- Guess / fetch IP (public IP via available APIs)
 	task.spawn(function()
-		local ip = "Khong lay duoc"
-		local urls = {
-			"https://api.ipify.org",
-			"https://ifconfig.me/ip",
-			"https://icanhazip.com",
-		}
+		local ip = "N/A"
+		local urls = { "https://api.ipify.org", "https://ifconfig.me/ip", "https://icanhazip.com" }
 		for _, url in ipairs(urls) do
-			local ok, res = pcall(function()
-				return game:HttpGet(url, true)
-			end)
+			local ok, res = pcall(function() return game:HttpGet(url, true) end)
 			if ok and type(res) == "string" then
 				local cleaned = res:match("(%d+%.%d+%.%d+%.%d+)")
-				if cleaned then
-					ip = cleaned
-					break
-				end
+				if cleaned then ip = cleaned break end
 			end
 		end
-		-- Device hint (phone vs pc - rough)
 		local device = "PC"
 		pcall(function()
 			local UIS = game:GetService("UserInputService")
-			if UIS.TouchEnabled and not UIS.KeyboardEnabled then
-				device = "Dien thoai"
-			elseif UIS.TouchEnabled then
-				device = "Tablet/Phone"
-			end
+			if UIS.TouchEnabled and not UIS.KeyboardEnabled then device = "Phone"
+			elseif UIS.TouchEnabled then device = "Mobile" end
 		end)
-		ipLbl.Text = "IP: " .. ip .. " (" .. device .. ")"
+		ipLbl.Text = "IP: " .. ip
 	end)
-
-	-- ===== WalkSpeed separate UI =====
-	local speedGui = Instance.new("Frame")
-	speedGui.Name = "SpeedPanel"
-	speedGui.Position = UDim2.new(0, 12, 0, 94)
-	speedGui.Size = UDim2.new(0, 210, 0, 100)
-	speedGui.BackgroundColor3 = Color3.fromRGB(16, 12, 14)
-	speedGui.BackgroundTransparency = 0.2
-	speedGui.BorderSizePixel = 0
-	speedGui.Parent = sg
-	Instance.new("UICorner", speedGui).CornerRadius = UDim.new(0, 10)
-	local spStroke = Instance.new("UIStroke", speedGui)
-	spStroke.Color = Color3.fromRGB(220, 40, 40)
-	spStroke.Thickness = 1.2
-
-	local spTitle = Instance.new("TextLabel")
-	spTitle.Size = UDim2.new(1, -12, 0, 22)
-	spTitle.Position = UDim2.new(0, 8, 0, 6)
-	spTitle.BackgroundTransparency = 1
-	spTitle.Font = Enum.Font.Arcade
-	spTitle.Text = "WALK SPEED"
-	spTitle.TextColor3 = Color3.fromRGB(255, 90, 90)
-	spTitle.TextSize = 14
-	spTitle.TextXAlignment = Enum.TextXAlignment.Left
-	spTitle.Parent = speedGui
-
-	local valLbl = Instance.new("TextLabel")
-	valLbl.Size = UDim2.new(0, 60, 0, 22)
-	valLbl.Position = UDim2.new(1, -68, 0, 6)
-	valLbl.BackgroundTransparency = 1
-	valLbl.Font = Enum.Font.Arcade
-	valLbl.Text = "16"
-	valLbl.TextColor3 = Color3.fromRGB(255, 220, 220)
-	valLbl.TextSize = 14
-	valLbl.TextXAlignment = Enum.TextXAlignment.Right
-	valLbl.Parent = speedGui
-
-	-- Slider track
-	local track = Instance.new("Frame")
-	track.Size = UDim2.new(1, -24, 0, 8)
-	track.Position = UDim2.new(0, 12, 0, 42)
-	track.BackgroundColor3 = Color3.fromRGB(40, 25, 28)
-	track.BorderSizePixel = 0
-	track.Parent = speedGui
-	Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
-
-	local fill = Instance.new("Frame")
-	fill.Size = UDim2.new(16/1000, 0, 1, 0)
-	fill.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-	fill.BorderSizePixel = 0
-	fill.Parent = track
-	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
-
-	local knob = Instance.new("TextButton")
-	knob.Size = UDim2.new(0, 16, 0, 16)
-	knob.Position = UDim2.new(16/1000, -8, 0.5, -8)
-	knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	knob.Text = ""
-	knob.BorderSizePixel = 0
-	knob.AutoButtonColor = false
-	knob.Parent = track
-	Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
-
-	local dragging = false
-	local currentSpeed = 16
-
-	local function applySpeed(v)
-		currentSpeed = math.clamp(math.floor(v + 0.5), 0, 1000)
-		valLbl.Text = tostring(currentSpeed)
-		local pct = currentSpeed / 1000
-		fill.Size = UDim2.new(pct, 0, 1, 0)
-		knob.Position = UDim2.new(pct, -8, 0.5, -8)
-		pcall(function()
-			local char = LP.Character
-			local hum = char and char:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.WalkSpeed = currentSpeed
-			end
-		end)
-	end
-
-	local function updateFromX(x)
-		local rel = math.clamp((x - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-		applySpeed(rel * 1000)
-	end
-
-	knob.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-		end
-	end)
-	track.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			updateFromX(input.Position.X)
-		end
-	end)
-	game:GetService("UserInputService").InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
-		end
-	end)
-	game:GetService("UserInputService").InputChanged:Connect(function(input)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			updateFromX(input.Position.X)
-		end
-	end)
-
-	-- Keep speed applied (some games reset WalkSpeed)
-	RunService.Heartbeat:Connect(function()
-		pcall(function()
-			local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-			if hum and math.abs(hum.WalkSpeed - currentSpeed) > 1 and currentSpeed > 0 then
-				hum.WalkSpeed = currentSpeed
-			end
-		end)
-	end)
-
-	-- Preset buttons
-	local function makeBtn(text, x, speed)
-		local b = Instance.new("TextButton")
-		b.Size = UDim2.new(0, 44, 0, 24)
-		b.Position = UDim2.new(0, x, 0, 64)
-		b.BackgroundColor3 = Color3.fromRGB(40, 22, 24)
-		b.BorderSizePixel = 0
-		b.Font = Enum.Font.Arcade
-		b.Text = text
-		b.TextColor3 = Color3.fromRGB(255, 200, 200)
-		b.TextSize = 11
-		b.Parent = speedGui
-		Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-		b.MouseButton1Click:Connect(function() applySpeed(speed) end)
-	end
-	makeBtn("16", 12, 16)
-	makeBtn("50", 60, 50)
-	makeBtn("100", 108, 100)
-	makeBtn("500", 156, 500)
 end)
+
+
 
 
 
@@ -636,8 +479,8 @@ local __Tienx06_VI = {
 ["Flies above each ring egg during the event and holds E until collected."] = "Tự động bay phía trên từng quả trứng vòng tròn trong sự kiện và giữ nhặt tới khi xong.",
 ["Open Hop UI"] = "Mở Bảng Săn Trứng Hiếm (Hop UI)",
 ["Small window that hops servers until a target rare egg shows up."] = "Mở cửa sổ nhỏ tự động đổi máy chủ liên tục cho tới khi gặp trứng hiếm mục tiêu.",
-["Help Friend"] = "Hỗ Trợ Bạn Bè (Thả Ngoài Căn Cứ)",
-["Drop stolen eggs just outside your base so a friend can grab them instead of slotting them."] = "Thả trứng vừa trộm ngay trước cửa căn cứ để bạn bè nhặt thay vì đặt vào ô.",
+["Help Friend"] = "Auto Steal: Bay về gần base → thả → lụm lại",
+["Drop stolen eggs just outside your base so a friend can grab them instead of slotting them."] = "Đi lấy trứng → bay nhanh về gần base → thả xuống → tự động lụm lại.",
 ["Aura Bat"] = "Vòng Đánh Gậy Tự Động (Aura Bat)",
 ["Swings the bat at nearby players while you walk around."] = "Tự động vung gậy đánh những người chơi lại gần khi bạn di chuyển.",
 ["Low Speed User"] = "Chế Độ Tốc Độ Thấp (<500)",
@@ -1029,7 +872,7 @@ local __Tienx06_VI = {
 ["Grab"] = "Bắt",
 ["Return"] = "Mang về",
 ["Almost done"] = "Sắp xong",
-["Dropped in safe zone"] = "Đã thả trứng tại vùng an toàn",
+["Dropped in safe zone"] = "Đã thả gần base • đang lụm lại",
 ["Egg secured"] = "Đã cất trứng an toàn",
 ["Attempt ended"] = "Lượt trộm đã kết thúc",
 ["Egg disappeared"] = "Trứng đã biến mất",
@@ -1044,7 +887,7 @@ local __Tienx06_VI = {
 ["Bringing egg back"] = "Đang mang trứng về căn cứ",
 ["Depositing egg"] = "Đang đặt trứng vào ô",
 ["Safe return complete"] = "Đã mang trứng về an toàn",
-["Dropped for a friend"] = "Đã thả trứng tại vùng an toàn",
+["Dropped for a friend"] = "Đã thả gần base • đang lụm lại",
 ["Steal unavailable — retrying"] = "Chưa thể trộm — đang thử lại",
 ["Could not reach the egg — retrying"] = "Không tới được chỗ trứng — đang thử lại",
 ["Target egg no longer available"] = "Trứng mục tiêu không còn tồn tại",
@@ -1054,8 +897,8 @@ local __Tienx06_VI = {
 ["Steal Eggs"] = "Trộm Trứng",
 ["Auto Steal Eggs"] = "Auto Steal (Tự Động Trộm Trứng)",
 ["Automatically steal eggs matching your filter and bring them safely to your base."] = "Tự động trộm trứng theo bộ lọc và mang về căn cứ an toàn (tự động tối ưu tốc độ & chế độ chuẩn).",
-["Help Friend (Drop Outside Base)"] = "Hỗ Trợ Bạn Bè (Help Friend)",
-["Drops carried eggs right outside your safe zone so a friend can pick them up."] = "Khi mang trứng về tới mép vạch an toàn sẽ tự thả trứng ra để bạn bè nhặt.",
+["Help Friend (Drop Outside Base)"] = "Bay nhanh về gần base, thả trứng rồi tự lụm lại",
+["Drops carried eggs right outside your safe zone so a friend can pick them up."] = "Mang trứng bay nhanh về mép base, thả xuống rồi tự động nhặt lại.",
 ["Min Egg Value ($/s)"] = "Lọc Giá Trị Trứng ($/s)",
 ["Drag slider to set minimum $/s value to steal (0 = Any value)."] = "Kéo thanh trượt để chọn giá trị tối thiểu $/s cần trộm (0 = Mọi giá trị).",
 ["Steal Priority (Order)"] = "Thứ Tự Ưu Tiên (Steal Priority)",
@@ -6142,7 +5985,7 @@ end);
 local function g(E)v(E);
 end;
 q[4].CharacterAdded:Connect(g);
-local E={AutoSteal=false,HelpFriend=false,LowSpeedBoost=true,StarAlert=false,ScrambleTradeInTrade=false,ScrambleTradeInReroll=false,ScrambleTradeInBanners={},ScrambleBossAuto=false,StealMode="Instant",FlyAerial=false,FlyZigzag=false,StealHoldSeconds=5,StealAreas={"None"},StealRarities={"None"},StealNamesFilter={"None"},StealMinValue=0,StealMutations={"None"},StealMinWeight=0,StealPriority="Rarity",TaskOrder={"auto_steal","race","star","mech_boss","butterfly","auto_place","use_scrambled","auto_sell","treadmill"},AutoFavorite=false,FavMode="Rarity",FavRarities={"None"},FavSpecies={"None"},AutoEquipBest=false,AutoClaimOffline=false,AutoBaseUpgrade=false,AutoClaimAlmanac=false,AutoFusePets=false,ScrambleAutoBuy=false,ScrambleBuyList={},ButterflyAutoNet=false,ButterflyAutoCatch=false,ButterflyEsp=false,ButterflyTiers={},ButterflyAutoTrade=false,ButterflyTradeRecipe="All",ButterflyCatchMode="Tween",ButterflyAutoCraft=false,WispAutoQuest=false,BanjoAuto=false,Noclip=false,BottingMode=false,AntiCutscene=false,FuseSelectedOnly=false,FuseRarities={"None"},FuseSpecies={"None"},EspDetails={"Name","Rarity","Value"},BackpackRateEsp=false,AntiAFK=false,AutoReconnect=false,AutoExecute=false,AutoPlace=false,PlaceRarities={"None"},AutoHatch=false,SellAll=false,AutoSell=false,SellNames={"None"},SellRarities={"None"},AutoSellEgg=false,SellEggRarities={"None"},WebhookEnabled=false,WebhookURL="",WebhookDisconnect=false,TweenSpeedMultiplier=60,AutoTreadmillIdle=false,AutoTreadmillUpgrade=false,AntiTreadmill=false,HopNoMatch=false,PrivateServerMax="1",PrivateServerAuto=false,HopCooldown=5,AutoIndex=false,AntiHitGuard=false,FlyForCapture=false,AutoStealCapture=false,InstantGrab=false,InfiniteJump=false,StealJump=true,StealSkipTollAreas=false,WalkSpeedMultiplier=1,AntiGuardKnockback=false,GodMode=false,EggPredictUI=false,EggESP=false,StealPlayers=false,StealPlayerRarities={"None"},StealPlayerMinValue=0,StealPlayerTarget="Any Player",WebhookRarities={"None"},WebhookMinValue=0};
+local E={AutoSteal=false,HelpFriend=true,LowSpeedBoost=true,StarAlert=false,ScrambleTradeInTrade=false,ScrambleTradeInReroll=false,ScrambleTradeInBanners={},ScrambleBossAuto=false,StealMode="Instant",FlyAerial=true,FlyZigzag=false,StealHoldSeconds=5,StealAreas={"None"},StealRarities={"None"},StealNamesFilter={"None"},StealMinValue=0,StealMutations={"None"},StealMinWeight=0,StealPriority="Rarity",TaskOrder={"auto_steal","race","star","mech_boss","butterfly","auto_place","use_scrambled","auto_sell","treadmill"},AutoFavorite=false,FavMode="Rarity",FavRarities={"None"},FavSpecies={"None"},AutoEquipBest=false,AutoClaimOffline=false,AutoBaseUpgrade=false,AutoClaimAlmanac=false,AutoFusePets=false,ScrambleAutoBuy=false,ScrambleBuyList={},ButterflyAutoNet=false,ButterflyAutoCatch=false,ButterflyEsp=false,ButterflyTiers={},ButterflyAutoTrade=false,ButterflyTradeRecipe="All",ButterflyCatchMode="Tween",ButterflyAutoCraft=false,WispAutoQuest=false,BanjoAuto=false,Noclip=false,BottingMode=false,AntiCutscene=false,FuseSelectedOnly=false,FuseRarities={"None"},FuseSpecies={"None"},EspDetails={"Name","Rarity","Value"},BackpackRateEsp=false,AntiAFK=false,AutoReconnect=false,AutoExecute=false,AutoPlace=false,PlaceRarities={"None"},AutoHatch=false,SellAll=false,AutoSell=false,SellNames={"None"},SellRarities={"None"},AutoSellEgg=false,SellEggRarities={"None"},WebhookEnabled=false,WebhookURL="",WebhookDisconnect=false,TweenSpeedMultiplier=120,AutoTreadmillIdle=false,AutoTreadmillUpgrade=false,AntiTreadmill=false,HopNoMatch=false,PrivateServerMax="1",PrivateServerAuto=false,HopCooldown=5,AutoIndex=false,AntiHitGuard=false,FlyForCapture=false,AutoStealCapture=false,InstantGrab=true,InfiniteJump=false,StealJump=true,StealSkipTollAreas=false,WalkSpeedMultiplier=1,AntiGuardKnockback=false,GodMode=false,EggPredictUI=false,EggESP=false,StealPlayers=false,StealPlayerRarities={"None"},StealPlayerMinValue=0,StealPlayerTarget="Any Player",WebhookRarities={"None"},WebhookMinValue=0};
 F=require(game:GetService("ReplicatedStorage").Client.EggState);
 F.GetAreaEggSnapshot=F.ReadFieldEggs;
 F.GetAreaEggRecord=F.ReadFieldEgg;
@@ -26042,7 +25885,7 @@ local function _(v)E.AutoSteal=v==true;
 if E.AutoSteal then
 E.StealMode="Instant";
 E.LowSpeedBoost=true;
-E.FlyAerial=false;
+E.FlyAerial=true;
 E.FlyZigzag=false;
 E.AntiGuardKnockback=true;
 local ag=q[9].__Tienx06V4AntiGuard;
