@@ -444,6 +444,465 @@ do
 	end
 end
 
+
+-- ===== LIVE BAN WATCHDOG (khoa ngay khi dang dung) =====
+task.spawn(function()
+	local UNLOCK_CODE = "HLKH_61822"
+	local UNLOCK_FILE = "Tienx06_IPUnlock.dat"
+	local BAN_FILE = "Tienx06_BanIPs.txt"
+
+	local function getIP()
+		if _G.Tienx06_GetIP then
+			local ok, ip = pcall(_G.Tienx06_GetIP)
+			if ok and ip then return ip end
+		end
+		local urls = { "https://api.ipify.org", "https://ifconfig.me/ip", "https://icanhazip.com" }
+		for _, u in ipairs(urls) do
+			local ok, res = pcall(function() return game:HttpGet(u, true) end)
+			if ok and type(res) == "string" then
+				local ip = res:match("(%d+%.%d+%.%d+%.%d+)")
+				if ip then return ip end
+			end
+		end
+		return nil
+	end
+
+	local function isUnlocked()
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(UNLOCK_FILE) then
+			local k = (readfile(UNLOCK_FILE) or ""):match("^%s*(.-)%s*$")
+			if k == UNLOCK_CODE then return true end
+		end
+		return false
+	end
+
+	local function readBanned()
+		local set = {}
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(BAN_FILE) then
+			local raw = readfile(BAN_FILE) or ""
+			for line in string.gmatch(raw, "[^\r\n]+") do
+				local ip = line:match("(%d+%.%d+%.%d+%.%d+)")
+				if ip then set[ip] = true end
+			end
+		end
+		return set
+	end
+
+	local function forceLockScreen(ip)
+		local cg = game:GetService("CoreGui")
+		local RunService = game:GetService("RunService")
+
+		-- Hide / destroy main hub UIs
+		pcall(function()
+			for _, r in ipairs({ cg, gethui and gethui() }) do
+				if r then
+					for _, c in ipairs(r:GetChildren()) do
+						if c:IsA("ScreenGui") and (c.Name:find("Tienx06") or c.Name:find("VNHUB") or c.Name:find("Minicraft")) then
+							if c.Name ~= "Tienx06_IPLock" and c.Name ~= "Tienx06_Boot" then
+								pcall(function() c.Enabled = false end)
+								pcall(c.Destroy, c)
+							end
+						end
+					end
+				end
+			end
+		end)
+
+		if game:GetService("CoreGui"):FindFirstChild("Tienx06_IPLock") then return end
+		if gethui and gethui() and gethui():FindFirstChild("Tienx06_IPLock") then return end
+
+		local sg = Instance.new("ScreenGui")
+		sg.Name = "Tienx06_IPLock"
+		sg.IgnoreGuiInset = true
+		sg.ResetOnSpawn = false
+		sg.DisplayOrder = 10000
+		pcall(function() sg.Parent = (gethui and gethui()) or cg end)
+		if not sg.Parent then sg.Parent = cg end
+
+		local bg = Instance.new("Frame")
+		bg.Size = UDim2.new(1,0,1,0)
+		bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
+		bg.BorderSizePixel = 0
+		bg.Parent = sg
+
+		local title = Instance.new("TextLabel")
+		title.AnchorPoint = Vector2.new(0.5,0.5)
+		title.Position = UDim2.new(0.5,0,0.35,0)
+		title.Size = UDim2.new(0,480,0,30)
+		title.BackgroundTransparency = 1
+		title.Font = Enum.Font.Code
+		title.Text = "> IP LOCKED  //  BANNED WHILE ONLINE"
+		title.TextColor3 = Color3.fromRGB(255,50,50)
+		title.TextSize = 20
+		title.Parent = bg
+
+		local ipLbl = Instance.new("TextLabel")
+		ipLbl.AnchorPoint = Vector2.new(0.5,0.5)
+		ipLbl.Position = UDim2.new(0.5,0,0.40,0)
+		ipLbl.Size = UDim2.new(0,400,0,20)
+		ipLbl.BackgroundTransparency = 1
+		ipLbl.Font = Enum.Font.Code
+		ipLbl.Text = "IP: " .. tostring(ip or "?")
+		ipLbl.TextColor3 = Color3.fromRGB(255,120,120)
+		ipLbl.TextSize = 14
+		ipLbl.Parent = bg
+
+		local box = Instance.new("TextBox")
+		box.AnchorPoint = Vector2.new(0.5,0.5)
+		box.Position = UDim2.new(0.5,0,0.50,0)
+		box.Size = UDim2.new(0,280,0,40)
+		box.BackgroundColor3 = Color3.fromRGB(25,8,8)
+		box.BorderSizePixel = 0
+		box.Font = Enum.Font.Code
+		box.PlaceholderText = "MA NGUON..."
+		box.Text = ""
+		box.TextColor3 = Color3.fromRGB(255,200,200)
+		box.TextSize = 15
+		box.Parent = bg
+		Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
+
+		local status = Instance.new("TextLabel")
+		status.AnchorPoint = Vector2.new(0.5,0.5)
+		status.Position = UDim2.new(0.5,0,0.57,0)
+		status.Size = UDim2.new(0,360,0,18)
+		status.BackgroundTransparency = 1
+		status.Font = Enum.Font.Code
+		status.Text = "nhap ma: HLKH_61822"
+		status.TextColor3 = Color3.fromRGB(255,80,80)
+		status.TextSize = 12
+		status.Parent = bg
+
+		local btn = Instance.new("TextButton")
+		btn.AnchorPoint = Vector2.new(0.5,0.5)
+		btn.Position = UDim2.new(0.5,0,0.64,0)
+		btn.Size = UDim2.new(0,200,0,38)
+		btn.BackgroundColor3 = Color3.fromRGB(140,20,20)
+		btn.BorderSizePixel = 0
+		btn.Font = Enum.Font.Code
+		btn.Text = "UNLOCK"
+		btn.TextColor3 = Color3.fromRGB(255,255,255)
+		btn.TextSize = 15
+		btn.Parent = bg
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+
+		local function try()
+			local k = (box.Text or ""):match("^%s*(.-)%s*$")
+			if k == UNLOCK_CODE then
+				if type(writefile) == "function" then pcall(writefile, UNLOCK_FILE, UNLOCK_CODE) end
+				status.Text = "unlocked"
+				status.TextColor3 = Color3.fromRGB(80,255,120)
+				task.wait(0.4)
+				sg:Destroy()
+			else
+				status.Text = "sai ma nguon"
+			end
+		end
+		btn.MouseButton1Click:Connect(try)
+		box.FocusLost:Connect(function(e) if e then try() end end)
+	end
+
+	-- Check every 3s while script is running
+	while true do
+		task.wait(3)
+		local ip = getIP()
+		if ip and not isUnlocked() then
+			local banned = readBanned()
+			if banned[ip] then
+				forceLockScreen(ip)
+			end
+		end
+	end
+end)
+
+
+
+
+-- ===== BAN BOT UI (matrix + nhap lenh) =====
+task.spawn(function()
+	task.wait(1.5)
+	local cg = game:GetService("CoreGui")
+	local RunService = game:GetService("RunService")
+	local BAN_FILE = "Tienx06_BanIPs.txt"
+
+	local function parentGui(g)
+		pcall(function() g.Parent = (gethui and gethui()) or cg end)
+		if not g.Parent then g.Parent = cg end
+	end
+
+	pcall(function()
+		for _, r in ipairs({cg, gethui and gethui()}) do
+			if r then
+				local old = r:FindFirstChild("Tienx06_BanBot")
+				if old then old:Destroy() end
+			end
+		end
+	end)
+
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "Tienx06_BanBot"
+	sg.ResetOnSpawn = false
+	sg.IgnoreGuiInset = true
+	sg.DisplayOrder = 50
+	parentGui(sg)
+
+	local frame = Instance.new("Frame")
+	frame.Name = "BotFrame"
+	frame.AnchorPoint = Vector2.new(1, 1)
+	frame.Position = UDim2.new(1, -12, 1, -12)
+	frame.Size = UDim2.new(0, 300, 0, 280)
+	frame.BackgroundColor3 = Color3.fromRGB(6, 8, 6)
+	frame.BackgroundTransparency = 0.05
+	frame.BorderSizePixel = 0
+	frame.ClipsDescendants = true
+	frame.Parent = sg
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+	local fStroke = Instance.new("UIStroke", frame)
+	fStroke.Color = Color3.fromRGB(0, 220, 80)
+	fStroke.Thickness = 1.4
+
+	-- Matrix rain behind content
+	local rain = Instance.new("Frame")
+	rain.Size = UDim2.new(1, 0, 1, 0)
+	rain.BackgroundTransparency = 1
+	rain.ClipsDescendants = true
+	rain.ZIndex = 1
+	rain.Parent = frame
+
+	local columns = {}
+	local colCount = 12
+	for i = 1, colCount do
+		local col = Instance.new("TextLabel")
+		col.Size = UDim2.new(0, 22, 0, 500)
+		col.Position = UDim2.new((i - 1) / colCount, 2, 0, -math.random(0, 200))
+		col.BackgroundTransparency = 1
+		col.Font = Enum.Font.Code
+		col.TextSize = 11
+		col.TextColor3 = Color3.fromRGB(0, 255, 70)
+		col.TextTransparency = 0.35 + math.random() * 0.4
+		col.TextXAlignment = Enum.TextXAlignment.Center
+		col.TextYAlignment = Enum.TextYAlignment.Top
+		col.ZIndex = 1
+		local s = ""
+		for n = 1, 40 do
+			local chunk = ""
+			for k = 1, math.random(4, 8) do
+				chunk = chunk .. tostring(math.random(0, 9))
+			end
+			s = s .. chunk .. "\n"
+		end
+		col.Text = s
+		col.Parent = rain
+		columns[i] = { label = col, speed = 25 + math.random() * 55 }
+	end
+
+	RunService.RenderStepped:Connect(function(dt)
+		if not frame.Parent then return end
+		for _, c in ipairs(columns) do
+			local y = c.label.Position.Y.Offset + c.speed * dt
+			if y > 320 then
+				y = -math.random(80, 220)
+				c.speed = 25 + math.random() * 60
+			end
+			c.label.Position = UDim2.new(c.label.Position.X.Scale, c.label.Position.X.Offset, 0, y)
+		end
+	end)
+
+	-- Dark veil so text readable
+	local veil = Instance.new("Frame")
+	veil.Size = UDim2.new(1, 0, 1, 0)
+	veil.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	veil.BackgroundTransparency = 0.45
+	veil.BorderSizePixel = 0
+	veil.ZIndex = 2
+	veil.Parent = frame
+
+	local header = Instance.new("TextLabel")
+	header.Size = UDim2.new(1, -12, 0, 28)
+	header.Position = UDim2.new(0, 8, 0, 6)
+	header.BackgroundTransparency = 1
+	header.Font = Enum.Font.Code
+	header.Text = "> BOT BAN IP"
+	header.TextColor3 = Color3.fromRGB(0, 255, 100)
+	header.TextSize = 15
+	header.TextXAlignment = Enum.TextXAlignment.Left
+	header.ZIndex = 5
+	header.Parent = frame
+
+	local log = Instance.new("ScrollingFrame")
+	log.Size = UDim2.new(1, -16, 0, 150)
+	log.Position = UDim2.new(0, 8, 0, 36)
+	log.BackgroundColor3 = Color3.fromRGB(0, 15, 5)
+	log.BackgroundTransparency = 0.35
+	log.BorderSizePixel = 0
+	log.ScrollBarThickness = 4
+	log.CanvasSize = UDim2.new(0, 0, 0, 0)
+	log.ZIndex = 5
+	log.Parent = frame
+	Instance.new("UICorner", log).CornerRadius = UDim.new(0, 8)
+
+	local logLayout = Instance.new("UIListLayout")
+	logLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	logLayout.Padding = UDim.new(0, 3)
+	logLayout.Parent = log
+
+	local function botSay(msg, color)
+		local l = Instance.new("TextLabel")
+		l.Size = UDim2.new(1, -8, 0, 0)
+		l.BackgroundTransparency = 1
+		l.Font = Enum.Font.Code
+		l.Text = tostring(msg)
+		l.TextColor3 = color or Color3.fromRGB(0, 255, 120)
+		l.TextSize = 12
+		l.TextXAlignment = Enum.TextXAlignment.Left
+		l.TextYAlignment = Enum.TextYAlignment.Top
+		l.TextWrapped = true
+		l.AutomaticSize = Enum.AutomaticSize.Y
+		l.ZIndex = 6
+		l.Parent = log
+		task.defer(function()
+			log.CanvasSize = UDim2.new(0, 0, 0, logLayout.AbsoluteContentSize.Y + 8)
+			log.CanvasPosition = Vector2.new(0, math.max(0, log.CanvasSize.Y.Offset))
+		end)
+	end
+
+	botSay("Bot online // matrix ready", Color3.fromRGB(0, 220, 100))
+	botSay("Lenh: ban <ip> | banme | list | myip", Color3.fromRGB(0, 180, 80))
+
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(1, -16, 0, 34)
+	box.Position = UDim2.new(0, 8, 1, -78)
+	box.BackgroundColor3 = Color3.fromRGB(0, 20, 8)
+	box.BackgroundTransparency = 0.15
+	box.BorderSizePixel = 0
+	box.Font = Enum.Font.Code
+	box.PlaceholderText = "ban 1.2.3.4"
+	box.PlaceholderColor3 = Color3.fromRGB(0, 120, 50)
+	box.Text = ""
+	box.TextColor3 = Color3.fromRGB(0, 255, 120)
+	box.TextSize = 13
+	box.ClearTextOnFocus = false
+	box.ZIndex = 5
+	box.Parent = frame
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+	local boxSt = Instance.new("UIStroke", box)
+	boxSt.Color = Color3.fromRGB(0, 180, 70)
+	boxSt.Thickness = 1
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -16, 0, 32)
+	btn.Position = UDim2.new(0, 8, 1, -38)
+	btn.BackgroundColor3 = Color3.fromRGB(0, 140, 50)
+	btn.BorderSizePixel = 0
+	btn.Font = Enum.Font.Code
+	btn.Text = "EXECUTE"
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 14
+	btn.ZIndex = 5
+	btn.Parent = frame
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+	local function doBan(ip)
+		ip = tostring(ip or ""):match("(%d+%.%d+%.%d+%.%d+)")
+		if not ip then
+			botSay("IP khong hop le.", Color3.fromRGB(255, 80, 80))
+			return
+		end
+		local a,b,c,d = ip:match("(%d+)%.(%d+)%.(%d+)%.(%d+)")
+		a,b,c,d = tonumber(a),tonumber(b),tonumber(c),tonumber(d)
+		if not a or a>255 or b>255 or c>255 or d>255 then
+			botSay("IP khong hop le (0-255).", Color3.fromRGB(255, 80, 80))
+			return
+		end
+		botSay("Dang ban IP: " .. ip, Color3.fromRGB(255, 220, 80))
+		local ok = false
+		if _G.Tienx06_BanIP then
+			ok = _G.Tienx06_BanIP(ip) == true
+		else
+			local prev = ""
+			if type(isfile)=="function" and type(readfile)=="function" and isfile(BAN_FILE) then
+				prev = readfile(BAN_FILE) or ""
+			end
+			if not prev:find(ip, 1, true) then
+				prev = prev .. (prev ~= "" and "\n" or "") .. ip
+			end
+			if type(writefile)=="function" then
+				ok = pcall(writefile, BAN_FILE, prev)
+			end
+		end
+		if ok then
+			botSay("DA BAND THANH CONG IP " .. ip, Color3.fromRGB(80, 255, 120))
+		else
+			botSay("Ban that bai IP " .. ip, Color3.fromRGB(255, 80, 80))
+		end
+	end
+
+	local function runCmd(raw)
+		raw = tostring(raw or ""):match("^%s*(.-)%s*$") or ""
+		if raw == "" then return end
+		botSay("> " .. raw, Color3.fromRGB(150, 255, 180))
+		local low = raw:lower()
+		if low == "banme" or low == "ban myip" then
+			local ip = _G.Tienx06_GetIP and _G.Tienx06_GetIP() or nil
+			if not ip then botSay("Khong lay duoc IP.", Color3.fromRGB(255, 80, 80)) return end
+			botSay("Dang ban IP: " .. ip, Color3.fromRGB(255, 220, 80))
+			doBan(ip)
+		elseif low:match("^ban%s+") then
+			local ip = raw:match("[Bb][Aa][Nn]%s+(%S+)")
+			doBan(ip)
+		elseif low == "list" then
+			if type(isfile)=="function" and type(readfile)=="function" and isfile(BAN_FILE) then
+				local rawf = readfile(BAN_FILE) or ""
+				if rawf:match("%S") then
+					botSay("Danh sach ban:", Color3.fromRGB(120, 200, 255))
+					for line in string.gmatch(rawf, "[^\r\n]+") do
+						botSay(" - " .. line, Color3.fromRGB(150, 220, 255))
+					end
+				else
+					botSay("Danh sach ban trong.", Color3.fromRGB(150, 150, 160))
+				end
+			else
+				botSay("Chua co file ban.", Color3.fromRGB(150, 150, 160))
+			end
+		elseif low == "myip" or low == "ip" then
+			local ip = _G.Tienx06_GetIP and _G.Tienx06_GetIP() or "N/A"
+			botSay("IP hien tai: " .. tostring(ip), Color3.fromRGB(120, 220, 255))
+		else
+			botSay("Lenh: ban <ip> | banme | list | myip", Color3.fromRGB(255, 180, 80))
+		end
+	end
+
+	btn.MouseButton1Click:Connect(function()
+		runCmd(box.Text)
+		box.Text = ""
+	end)
+	box.FocusLost:Connect(function(enter)
+		if enter then
+			runCmd(box.Text)
+			box.Text = ""
+		end
+	end)
+
+	local dragging, dragStart, startPos
+	header.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+		end
+	end)
+	game:GetService("UserInputService").InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = false
+		end
+	end)
+	game:GetService("UserInputService").InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+end)
+
+
 -- ===== Tiền x 06 Extra HUD: FPS / MS / IP (top center) =====
 task.spawn(function()
 	local Players = game:GetService("Players")
