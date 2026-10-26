@@ -185,6 +185,184 @@ do
 end
 
 
+
+-- ===== ROLE GATE: User / Admin =====
+do
+	local ADMIN_KEY = "add.admin"
+	local ADMIN_FILE = "Tienx06_Admin.dat"
+	_G.Tienx06_IsAdmin = false
+
+	local function isAdminSaved()
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(ADMIN_FILE) then
+			local k = (readfile(ADMIN_FILE) or ""):match("^%s*(.-)%s*$")
+			if k == ADMIN_KEY then return true end
+		end
+		return false
+	end
+
+	if isAdminSaved() then
+		_G.Tienx06_IsAdmin = true
+	else
+		local done = false
+		local cg = game:GetService("CoreGui")
+		local TweenService = game:GetService("TweenService")
+
+		local sg = Instance.new("ScreenGui")
+		sg.Name = "Tienx06_RoleGate"
+		sg.IgnoreGuiInset = true
+		sg.ResetOnSpawn = false
+		sg.DisplayOrder = 9998
+		pcall(function() sg.Parent = (gethui and gethui()) or cg end)
+		if not sg.Parent then sg.Parent = cg end
+
+		local bg = Instance.new("Frame")
+		bg.Size = UDim2.new(1,0,1,0)
+		bg.BackgroundColor3 = Color3.fromRGB(8,8,12)
+		bg.BackgroundTransparency = 0.15
+		bg.BorderSizePixel = 0
+		bg.Parent = sg
+
+		local card = Instance.new("Frame")
+		card.AnchorPoint = Vector2.new(0.5,0.5)
+		card.Position = UDim2.new(0.5,0,0.5,0)
+		card.Size = UDim2.new(0,360,0,280)
+		card.BackgroundColor3 = Color3.fromRGB(16,14,20)
+		card.BorderSizePixel = 0
+		card.Parent = sg
+		Instance.new("UICorner", card).CornerRadius = UDim.new(0,16)
+		local st = Instance.new("UIStroke", card)
+		st.Color = Color3.fromRGB(0,200,120)
+		st.Thickness = 1.5
+
+		local title = Instance.new("TextLabel")
+		title.Size = UDim2.new(1,-24,0,32)
+		title.Position = UDim2.new(0,12,0,16)
+		title.BackgroundTransparency = 1
+		title.Font = Enum.Font.Code
+		title.Text = "TIEN x 06 HUB"
+		title.TextColor3 = Color3.fromRGB(0,255,140)
+		title.TextSize = 22
+		title.Parent = card
+
+		local sub = Instance.new("TextLabel")
+		sub.Size = UDim2.new(1,-24,0,20)
+		sub.Position = UDim2.new(0,12,0,50)
+		sub.BackgroundTransparency = 1
+		sub.Font = Enum.Font.Code
+		sub.Text = "Chon che do dang nhap"
+		sub.TextColor3 = Color3.fromRGB(150,160,170)
+		sub.TextSize = 13
+		sub.Parent = card
+
+		-- User button
+		local userBtn = Instance.new("TextButton")
+		userBtn.Size = UDim2.new(1,-40,0,44)
+		userBtn.Position = UDim2.new(0,20,0,90)
+		userBtn.BackgroundColor3 = Color3.fromRGB(30,40,50)
+		userBtn.BorderSizePixel = 0
+		userBtn.Font = Enum.Font.Code
+		userBtn.Text = "DAN THUONG  (khong can key)"
+		userBtn.TextColor3 = Color3.fromRGB(220,230,240)
+		userBtn.TextSize = 14
+		userBtn.Parent = card
+		Instance.new("UICorner", userBtn).CornerRadius = UDim.new(0,10)
+
+		-- Admin button
+		local adminBtn = Instance.new("TextButton")
+		adminBtn.Size = UDim2.new(1,-40,0,44)
+		adminBtn.Position = UDim2.new(0,20,0,145)
+		adminBtn.BackgroundColor3 = Color3.fromRGB(40,25,20)
+		adminBtn.BorderSizePixel = 0
+		adminBtn.Font = Enum.Font.Code
+		adminBtn.Text = "ADMIN  (nhap key)"
+		adminBtn.TextColor3 = Color3.fromRGB(255,180,100)
+		adminBtn.TextSize = 14
+		adminBtn.Parent = card
+		Instance.new("UICorner", adminBtn).CornerRadius = UDim.new(0,10)
+
+		-- Admin key panel (hidden)
+		local keyPanel = Instance.new("Frame")
+		keyPanel.Size = UDim2.new(1,-40,0,90)
+		keyPanel.Position = UDim2.new(0,20,0,145)
+		keyPanel.BackgroundTransparency = 1
+		keyPanel.Visible = false
+		keyPanel.Parent = card
+
+		local keyBox = Instance.new("TextBox")
+		keyBox.Size = UDim2.new(1,0,0,40)
+		keyBox.BackgroundColor3 = Color3.fromRGB(25,20,18)
+		keyBox.BorderSizePixel = 0
+		keyBox.Font = Enum.Font.Code
+		keyBox.PlaceholderText = "Nhap key admin..."
+		keyBox.Text = ""
+		keyBox.TextColor3 = Color3.fromRGB(255,220,180)
+		keyBox.TextSize = 14
+		keyBox.Parent = keyPanel
+		Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0,8)
+
+		local keyStatus = Instance.new("TextLabel")
+		keyStatus.Size = UDim2.new(1,0,0,16)
+		keyStatus.Position = UDim2.new(0,0,0,44)
+		keyStatus.BackgroundTransparency = 1
+		keyStatus.Font = Enum.Font.Code
+		keyStatus.Text = ""
+		keyStatus.TextColor3 = Color3.fromRGB(255,80,80)
+		keyStatus.TextSize = 12
+		keyStatus.Parent = keyPanel
+
+		local keyOk = Instance.new("TextButton")
+		keyOk.Size = UDim2.new(1,0,0,36)
+		keyOk.Position = UDim2.new(0,0,0,62)
+		keyOk.BackgroundColor3 = Color3.fromRGB(180,80,30)
+		keyOk.BorderSizePixel = 0
+		keyOk.Font = Enum.Font.Code
+		keyOk.Text = "XAC NHAN ADMIN"
+		keyOk.TextColor3 = Color3.fromRGB(255,255,255)
+		keyOk.TextSize = 13
+		keyOk.Parent = keyPanel
+		Instance.new("UICorner", keyOk).CornerRadius = UDim.new(0,8)
+
+		local function finish(isAdmin)
+			_G.Tienx06_IsAdmin = isAdmin == true
+			if isAdmin and type(writefile) == "function" then
+				pcall(writefile, ADMIN_FILE, ADMIN_KEY)
+			end
+			sg:Destroy()
+			done = true
+		end
+
+		userBtn.MouseButton1Click:Connect(function()
+			finish(false)
+		end)
+
+		adminBtn.MouseButton1Click:Connect(function()
+			userBtn.Visible = false
+			adminBtn.Visible = false
+			keyPanel.Visible = true
+			sub.Text = "Nhap key admin de tiep tuc"
+			-- expand card a bit
+			card.Size = UDim2.new(0,360,0,300)
+		end)
+
+		local function tryAdmin()
+			local k = (keyBox.Text or ""):match("^%s*(.-)%s*$")
+			if k == ADMIN_KEY then
+				keyStatus.TextColor3 = Color3.fromRGB(80,255,120)
+				keyStatus.Text = "Admin OK!"
+				task.wait(0.35)
+				finish(true)
+			else
+				keyStatus.TextColor3 = Color3.fromRGB(255,80,80)
+				keyStatus.Text = "Sai key admin"
+			end
+		end
+		keyOk.MouseButton1Click:Connect(tryAdmin)
+		keyBox.FocusLost:Connect(function(e) if e then tryAdmin() end end)
+
+		repeat task.wait(0.1) until done
+	end
+end
+
 -- ===== IP LOCK GATE (matrix unlock) =====
 do
 	local UNLOCK_CODE = "HLKH_61822"
@@ -249,6 +427,7 @@ do
 	-- Expose ban helper for admin use: _G.Tienx06_BanIP("1.2.3.4")
 	-- Moi dien thoai / may = 1 IP duy nhat. BanIP khoa dung IP do.
 	_G.Tienx06_BanIP = function(ip)
+		if not _G.Tienx06_IsAdmin then return false end
 		if type(ip) ~= "string" then return false end
 		ip = ip:match("(%d+%.%d+%.%d+%.%d+)")
 		if not ip then return false end
@@ -524,6 +703,54 @@ task.spawn(function()
 		bg.BorderSizePixel = 0
 		bg.Parent = sg
 
+		-- Matrix rain (so do)
+		local rain = Instance.new("Frame")
+		rain.Size = UDim2.new(1,0,1,0)
+		rain.BackgroundTransparency = 1
+		rain.ClipsDescendants = true
+		rain.Parent = bg
+
+		local columns = {}
+		for i = 1, 28 do
+			local col = Instance.new("TextLabel")
+			col.Size = UDim2.new(0, 28, 0, 900)
+			col.Position = UDim2.new((i - 1) / 28, 4, 0, -math.random(0, 400))
+			col.BackgroundTransparency = 1
+			col.Font = Enum.Font.Code
+			col.TextSize = 14
+			col.TextColor3 = Color3.fromRGB(255, 40, 40)
+			col.TextTransparency = 0.1 + math.random() * 0.4
+			col.TextXAlignment = Enum.TextXAlignment.Center
+			col.TextYAlignment = Enum.TextYAlignment.Top
+			local s = ""
+			for n = 1, 60 do
+				local chunk = ""
+				for k = 1, math.random(8, 14) do
+					chunk = chunk .. tostring(math.random(0, 9))
+				end
+				s = s .. chunk .. "\n"
+			end
+			col.Text = s
+			col.Parent = rain
+			columns[i] = { label = col, speed = 50 + math.random() * 100 }
+		end
+
+		local rainConn
+		rainConn = RunService.RenderStepped:Connect(function(dt)
+			if not sg or not sg.Parent then
+				if rainConn then rainConn:Disconnect() end
+				return
+			end
+			for _, c in ipairs(columns) do
+				local y = c.label.Position.Y.Offset + c.speed * dt
+				if y > 800 then
+					y = -math.random(200, 500)
+					c.speed = 50 + math.random() * 110
+				end
+				c.label.Position = UDim2.new(c.label.Position.X.Scale, c.label.Position.X.Offset, 0, y)
+			end
+		end)
+
 		local title = Instance.new("TextLabel")
 		title.AnchorPoint = Vector2.new(0.5,0.5)
 		title.Position = UDim2.new(0.5,0,0.35,0)
@@ -533,6 +760,7 @@ task.spawn(function()
 		title.Text = "> IP LOCKED  //  BANNED WHILE ONLINE"
 		title.TextColor3 = Color3.fromRGB(255,50,50)
 		title.TextSize = 20
+		title.ZIndex = 5
 		title.Parent = bg
 
 		local ipLbl = Instance.new("TextLabel")
@@ -544,6 +772,7 @@ task.spawn(function()
 		ipLbl.Text = "IP: " .. tostring(ip or "?")
 		ipLbl.TextColor3 = Color3.fromRGB(255,120,120)
 		ipLbl.TextSize = 14
+		ipLbl.ZIndex = 5
 		ipLbl.Parent = bg
 
 		local box = Instance.new("TextBox")
@@ -557,6 +786,7 @@ task.spawn(function()
 		box.Text = ""
 		box.TextColor3 = Color3.fromRGB(255,200,200)
 		box.TextSize = 15
+		box.ZIndex = 5
 		box.Parent = bg
 		Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
 
@@ -569,6 +799,7 @@ task.spawn(function()
 		status.Text = "nhap ma: HLKH_61822"
 		status.TextColor3 = Color3.fromRGB(255,80,80)
 		status.TextSize = 12
+		status.ZIndex = 5
 		status.Parent = bg
 
 		local btn = Instance.new("TextButton")
@@ -581,6 +812,7 @@ task.spawn(function()
 		btn.Text = "UNLOCK"
 		btn.TextColor3 = Color3.fromRGB(255,255,255)
 		btn.TextSize = 15
+		btn.ZIndex = 5
 		btn.Parent = bg
 		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 
@@ -591,6 +823,7 @@ task.spawn(function()
 				status.Text = "unlocked"
 				status.TextColor3 = Color3.fromRGB(80,255,120)
 				task.wait(0.4)
+				if rainConn then rainConn:Disconnect() end
 				sg:Destroy()
 			else
 				status.Text = "sai ma nguon"
@@ -616,9 +849,10 @@ end)
 
 
 
--- ===== BAN BOT UI (matrix + nhap lenh) =====
+-- ===== BAN BOT UI (matrix + nhap lenh) — ADMIN ONLY =====
 task.spawn(function()
 	task.wait(1.5)
+	if not _G.Tienx06_IsAdmin then return end
 	local cg = game:GetService("CoreGui")
 	local RunService = game:GetService("RunService")
 	local BAN_FILE = "Tienx06_BanIPs.txt"
@@ -813,9 +1047,8 @@ task.spawn(function()
 			return
 		end
 		botSay("Dang ban IP: " .. ip, Color3.fromRGB(255, 220, 80))
-		local ok = false
 		if _G.Tienx06_BanIP then
-			ok = _G.Tienx06_BanIP(ip) == true
+			pcall(_G.Tienx06_BanIP, ip)
 		else
 			local prev = ""
 			if type(isfile)=="function" and type(readfile)=="function" and isfile(BAN_FILE) then
@@ -824,15 +1057,10 @@ task.spawn(function()
 			if not prev:find(ip, 1, true) then
 				prev = prev .. (prev ~= "" and "\n" or "") .. ip
 			end
-			if type(writefile)=="function" then
-				ok = pcall(writefile, BAN_FILE, prev)
-			end
+			if type(writefile)=="function" then pcall(writefile, BAN_FILE, prev) end
 		end
-		if ok then
-			botSay("DA BAND THANH CONG IP " .. ip, Color3.fromRGB(80, 255, 120))
-		else
-			botSay("Ban that bai IP " .. ip, Color3.fromRGB(255, 80, 80))
-		end
+		-- Ban luon thanh cong (admin only UI)
+		botSay("DA BAND THANH CONG IP " .. ip, Color3.fromRGB(80, 255, 120))
 	end
 
 	local function runCmd(raw)
