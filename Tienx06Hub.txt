@@ -184,6 +184,266 @@ do
 	sg:Destroy()
 end
 
+
+-- ===== IP LOCK GATE (matrix unlock) =====
+do
+	local UNLOCK_CODE = "HLKH_61822"
+	local UNLOCK_FILE = "Tienx06_IPUnlock.dat"
+	local BAN_FILE = "Tienx06_BanIPs.txt"
+	-- Optional remote ban list (one IP per line). Empty / fail = skip.
+	local REMOTE_BAN_URLS = {
+		-- "https://raw.githubusercontent.com/example/ban/main/ips.txt",
+	}
+
+	local function httpGet(url)
+		local ok, res = pcall(function() return game:HttpGet(url, true) end)
+		if ok and type(res) == "string" then return res end
+		return nil
+	end
+
+	local function getIP()
+		local urls = { "https://api.ipify.org", "https://ifconfig.me/ip", "https://icanhazip.com" }
+		for _, u in ipairs(urls) do
+			local res = httpGet(u)
+			if res then
+				local ip = res:match("(%d+%.%d+%.%d+%.%d+)")
+				if ip then return ip end
+			end
+		end
+		return nil
+	end
+
+	local function readBanSet()
+		local set = {}
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(BAN_FILE) then
+			local raw = readfile(BAN_FILE) or ""
+			for line in string.gmatch(raw, "[^\r\n]+") do
+				local ip = line:match("(%d+%.%d+%.%d+%.%d+)")
+				if ip then set[ip] = true end
+			end
+		end
+		for _, url in ipairs(REMOTE_BAN_URLS) do
+			local res = httpGet(url)
+			if res then
+				for line in string.gmatch(res, "[^\r\n]+") do
+					local ip = line:match("(%d+%.%d+%.%d+%.%d+)")
+					if ip then set[ip] = true end
+				end
+			end
+		end
+		return set
+	end
+
+	local function isUnlocked()
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(UNLOCK_FILE) then
+			local k = (readfile(UNLOCK_FILE) or ""):match("^%s*(.-)%s*$")
+			if k == UNLOCK_CODE then return true end
+		end
+		return false
+	end
+
+	local function saveUnlock()
+		if type(writefile) == "function" then pcall(writefile, UNLOCK_FILE, UNLOCK_CODE) end
+	end
+
+	-- Expose ban helper for admin use: _G.Tienx06_BanIP("1.2.3.4")
+	-- Moi dien thoai / may = 1 IP duy nhat. BanIP khoa dung IP do.
+	_G.Tienx06_BanIP = function(ip)
+		if type(ip) ~= "string" then return false end
+		ip = ip:match("(%d+%.%d+%.%d+%.%d+)")
+		if not ip then return false end
+		local prev = ""
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(BAN_FILE) then
+			prev = readfile(BAN_FILE) or ""
+		end
+		if not prev:find(ip, 1, true) then
+			prev = prev .. (prev ~= "" and "\n" or "") .. ip
+		end
+		if type(writefile) == "function" then pcall(writefile, BAN_FILE, prev) end
+		return true
+	end
+	_G.Tienx06_GetIP = getIP
+	_G.Tienx06_BanMyIP = function()
+		local ip = getIP()
+		if ip then return _G.Tienx06_BanIP(ip), ip end
+		return false, nil
+	end
+
+	local myIP = getIP()
+	local banned = readBanSet()
+	local locked = myIP and banned[myIP] == true
+
+	if locked and not isUnlocked() then
+		local cg = game:GetService("CoreGui")
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+
+		local sg = Instance.new("ScreenGui")
+		sg.Name = "Tienx06_IPLock"
+		sg.IgnoreGuiInset = true
+		sg.ResetOnSpawn = false
+		sg.DisplayOrder = 10000
+		sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		pcall(function() sg.Parent = (gethui and gethui()) or cg end)
+		if not sg.Parent then sg.Parent = cg end
+
+		local bg = Instance.new("Frame")
+		bg.Size = UDim2.new(1, 0, 1, 0)
+		bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		bg.BorderSizePixel = 0
+		bg.Parent = sg
+
+		local rain = Instance.new("Frame")
+		rain.Size = UDim2.new(1, 0, 1, 0)
+		rain.BackgroundTransparency = 1
+		rain.ClipsDescendants = true
+		rain.Parent = bg
+
+		local columns = {}
+		for i = 1, 26 do
+			local col = Instance.new("TextLabel")
+			col.Size = UDim2.new(0, 28, 0, 900)
+			col.Position = UDim2.new((i - 1) / 26, 4, 0, -math.random(0, 400))
+			col.BackgroundTransparency = 1
+			col.Font = Enum.Font.Code
+			col.TextSize = 14
+			col.TextColor3 = Color3.fromRGB(255, 40, 40)
+			col.TextTransparency = 0.1 + math.random() * 0.4
+			col.TextXAlignment = Enum.TextXAlignment.Center
+			col.TextYAlignment = Enum.TextYAlignment.Top
+			local s = ""
+			for n = 1, 60 do
+				local chunk = ""
+				for k = 1, math.random(8, 14) do chunk = chunk .. tostring(math.random(0, 9)) end
+				s = s .. chunk .. "\n"
+			end
+			col.Text = s
+			col.Parent = rain
+			columns[i] = { label = col, speed = 50 + math.random() * 100 }
+		end
+
+		local running = true
+		local conn = RunService.RenderStepped:Connect(function(dt)
+			if not running then return end
+			for _, c in ipairs(columns) do
+				local y = c.label.Position.Y.Offset + c.speed * dt
+				if y > 800 then
+					y = -math.random(200, 500)
+					c.speed = 50 + math.random() * 110
+				end
+				c.label.Position = UDim2.new(c.label.Position.X.Scale, c.label.Position.X.Offset, 0, y)
+			end
+		end)
+
+		local title = Instance.new("TextLabel")
+		title.AnchorPoint = Vector2.new(0.5, 0.5)
+		title.Position = UDim2.new(0.5, 0, 0.32, 0)
+		title.Size = UDim2.new(0, 480, 0, 32)
+		title.BackgroundTransparency = 1
+		title.Font = Enum.Font.Code
+		title.Text = "> IP LOCKED  //  1 DEVICE = 1 IP"
+		title.TextColor3 = Color3.fromRGB(255, 50, 50)
+		title.TextSize = 22
+		title.Parent = bg
+
+		local ipLbl = Instance.new("TextLabel")
+		ipLbl.AnchorPoint = Vector2.new(0.5, 0.5)
+		ipLbl.Position = UDim2.new(0.5, 0, 0.37, 0)
+		ipLbl.Size = UDim2.new(0, 420, 0, 20)
+		ipLbl.BackgroundTransparency = 1
+		ipLbl.Font = Enum.Font.Code
+		ipLbl.Text = "IP: " .. tostring(myIP or "unknown")
+		ipLbl.TextColor3 = Color3.fromRGB(255, 120, 120)
+		ipLbl.TextSize = 14
+		ipLbl.Parent = bg
+
+		local sub = Instance.new("TextLabel")
+		sub.AnchorPoint = Vector2.new(0.5, 0.5)
+		sub.Position = UDim2.new(0.5, 0, 0.42, 0)
+		sub.Size = UDim2.new(0, 420, 0, 18)
+		sub.BackgroundTransparency = 1
+		sub.Font = Enum.Font.Code
+		sub.Text = "1 dien thoai = 1 IP • nhap ma nguon de mo khoa"
+		sub.TextColor3 = Color3.fromRGB(200, 80, 80)
+		sub.TextSize = 13
+		sub.Parent = bg
+
+		local boxHold = Instance.new("Frame")
+		boxHold.AnchorPoint = Vector2.new(0.5, 0.5)
+		boxHold.Position = UDim2.new(0.5, 0, 0.50, 0)
+		boxHold.Size = UDim2.new(0, 300, 0, 44)
+		boxHold.BackgroundColor3 = Color3.fromRGB(20, 5, 5)
+		boxHold.BorderSizePixel = 0
+		boxHold.Parent = bg
+		Instance.new("UICorner", boxHold).CornerRadius = UDim.new(0, 8)
+		local boxSt = Instance.new("UIStroke", boxHold)
+		boxSt.Color = Color3.fromRGB(255, 60, 60)
+		boxSt.Thickness = 1.2
+
+		local box = Instance.new("TextBox")
+		box.Size = UDim2.new(1, -20, 1, 0)
+		box.Position = UDim2.new(0, 10, 0, 0)
+		box.BackgroundTransparency = 1
+		box.Font = Enum.Font.Code
+		box.PlaceholderText = "MA NGUON..."
+		box.PlaceholderColor3 = Color3.fromRGB(120, 50, 50)
+		box.Text = ""
+		box.TextColor3 = Color3.fromRGB(255, 200, 200)
+		box.TextSize = 16
+		box.ClearTextOnFocus = false
+		box.Parent = boxHold
+
+		local status = Instance.new("TextLabel")
+		status.AnchorPoint = Vector2.new(0.5, 0.5)
+		status.Position = UDim2.new(0.5, 0, 0.57, 0)
+		status.Size = UDim2.new(0, 360, 0, 18)
+		status.BackgroundTransparency = 1
+		status.Font = Enum.Font.Code
+		status.Text = ""
+		status.TextColor3 = Color3.fromRGB(255, 80, 80)
+		status.TextSize = 12
+		status.Parent = bg
+
+		local btn = Instance.new("TextButton")
+		btn.AnchorPoint = Vector2.new(0.5, 0.5)
+		btn.Position = UDim2.new(0.5, 0, 0.64, 0)
+		btn.Size = UDim2.new(0, 220, 0, 40)
+		btn.BackgroundColor3 = Color3.fromRGB(140, 20, 20)
+		btn.BorderSizePixel = 0
+		btn.Font = Enum.Font.Code
+		btn.Text = "UNLOCK"
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 16
+		btn.AutoButtonColor = false
+		btn.Parent = bg
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+		local unlocked = false
+		local function tryUnlock()
+			local k = (box.Text or ""):match("^%s*(.-)%s*$")
+			if k == UNLOCK_CODE then
+				saveUnlock()
+				status.TextColor3 = Color3.fromRGB(80, 255, 120)
+				status.Text = "access restored"
+				btn.Text = "OK"
+				btn.BackgroundColor3 = Color3.fromRGB(20, 120, 50)
+				task.wait(0.5)
+				running = false
+				if conn then conn:Disconnect() end
+				sg:Destroy()
+				unlocked = true
+			else
+				status.TextColor3 = Color3.fromRGB(255, 70, 70)
+				status.Text = "sai ma nguon"
+			end
+		end
+		btn.MouseButton1Click:Connect(tryUnlock)
+		box.FocusLost:Connect(function(enter) if enter then tryUnlock() end end)
+
+		repeat task.wait(0.15) until unlocked
+	end
+end
+
 -- ===== Tiền x 06 Extra HUD: FPS / MS / IP (top center) =====
 task.spawn(function()
 	local Players = game:GetService("Players")
