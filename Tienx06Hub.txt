@@ -1,3 +1,189 @@
+
+-- ===== BOOT LOADER: Matrix + Loading Bar =====
+do
+	local cg = game:GetService("CoreGui")
+	local TweenService = game:GetService("TweenService")
+	local RunService = game:GetService("RunService")
+
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "Tienx06_Boot"
+	sg.IgnoreGuiInset = true
+	sg.ResetOnSpawn = false
+	sg.DisplayOrder = 9999
+	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	pcall(function() sg.Parent = (gethui and gethui()) or cg end)
+	if not sg.Parent then sg.Parent = cg end
+
+	-- Black fullscreen
+	local bg = Instance.new("Frame")
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	bg.BorderSizePixel = 0
+	bg.Parent = sg
+
+	-- Matrix rain container
+	local rain = Instance.new("Frame")
+	rain.Size = UDim2.new(1, 0, 1, 0)
+	rain.BackgroundTransparency = 1
+	rain.ClipsDescendants = true
+	rain.Parent = bg
+
+	local chars = "01"
+	local columns = {}
+	local colCount = 28
+	for i = 1, colCount do
+		local col = Instance.new("TextLabel")
+		col.Size = UDim2.new(0, 28, 0, 900)
+		col.Position = UDim2.new((i - 1) / colCount, 4, 0, -math.random(0, 400))
+		col.BackgroundTransparency = 1
+		col.Font = Enum.Font.Code
+		col.TextSize = 14
+		col.TextColor3 = Color3.fromRGB(0, 255, 70)
+		col.TextTransparency = 0.15 + math.random() * 0.35
+		col.TextXAlignment = Enum.TextXAlignment.Center
+		col.TextYAlignment = Enum.TextYAlignment.Top
+		col.TextWrapped = true
+		local s = ""
+		for n = 1, 55 do
+			s = s .. string.sub(chars, math.random(1, #chars), math.random(1, #chars)) .. "\n"
+		end
+		-- denser random stream
+		s = ""
+		for n = 1, 60 do
+			local chunk = ""
+			for k = 1, math.random(8, 14) do
+				chunk = chunk .. tostring(math.random(0, 9))
+			end
+			s = s .. chunk .. "\n"
+		end
+		col.Text = s
+		col.Parent = rain
+		columns[i] = { label = col, speed = 40 + math.random() * 90 }
+	end
+
+	local running = true
+	local conn
+	conn = RunService.RenderStepped:Connect(function(dt)
+		if not running then return end
+		for _, c in ipairs(columns) do
+			local y = c.label.Position.Y.Offset + c.speed * dt
+			if y > 800 then
+				y = -math.random(200, 500)
+				c.speed = 40 + math.random() * 100
+			end
+			c.label.Position = UDim2.new(c.label.Position.X.Scale, c.label.Position.X.Offset, 0, y)
+		end
+	end)
+
+	-- Center title
+	local title = Instance.new("TextLabel")
+	title.AnchorPoint = Vector2.new(0.5, 0.5)
+	title.Position = UDim2.new(0.5, 0, 0.42, 0)
+	title.Size = UDim2.new(0, 420, 0, 36)
+	title.BackgroundTransparency = 1
+	title.Font = Enum.Font.Code
+	title.Text = "> TIEN x 06 HUB  //  BOOT"
+	title.TextColor3 = Color3.fromRGB(0, 255, 100)
+	title.TextSize = 22
+	title.Parent = bg
+
+	local sub = Instance.new("TextLabel")
+	sub.AnchorPoint = Vector2.new(0.5, 0.5)
+	sub.Position = UDim2.new(0.5, 0, 0.47, 0)
+	sub.Size = UDim2.new(0, 420, 0, 20)
+	sub.BackgroundTransparency = 1
+	sub.Font = Enum.Font.Code
+	sub.Text = "decrypting modules..."
+	sub.TextColor3 = Color3.fromRGB(0, 180, 70)
+	sub.TextSize = 13
+	sub.Parent = bg
+
+	-- Loading bar track
+	local track = Instance.new("Frame")
+	track.AnchorPoint = Vector2.new(0.5, 0.5)
+	track.Position = UDim2.new(0.5, 0, 0.55, 0)
+	track.Size = UDim2.new(0, 320, 0, 14)
+	track.BackgroundColor3 = Color3.fromRGB(10, 25, 12)
+	track.BorderSizePixel = 0
+	track.Parent = bg
+	Instance.new("UICorner", track).CornerRadius = UDim.new(0, 6)
+	local trackStroke = Instance.new("UIStroke", track)
+	trackStroke.Color = Color3.fromRGB(0, 200, 80)
+	trackStroke.Thickness = 1
+
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.new(0, 0, 1, 0)
+	fill.BackgroundColor3 = Color3.fromRGB(0, 255, 90)
+	fill.BorderSizePixel = 0
+	fill.Parent = track
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 6)
+	local grad = Instance.new("UIGradient", fill)
+	grad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 120, 40)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 100)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 255, 180)),
+	})
+
+	local pct = Instance.new("TextLabel")
+	pct.AnchorPoint = Vector2.new(0.5, 0.5)
+	pct.Position = UDim2.new(0.5, 0, 0.60, 0)
+	pct.Size = UDim2.new(0, 200, 0, 22)
+	pct.BackgroundTransparency = 1
+	pct.Font = Enum.Font.Code
+	pct.Text = "0%"
+	pct.TextColor3 = Color3.fromRGB(0, 255, 120)
+	pct.TextSize = 16
+	pct.Parent = bg
+
+	local statusLines = {
+		"init core...",
+		"load steal engine...",
+		"inject ui lib...",
+		"bind remotes...",
+		"sync config...",
+		"ready."
+	}
+
+	-- Animate 0 -> 100
+	local t0 = os.clock()
+	local duration = 3.2
+	while os.clock() - t0 < duration do
+		local p = math.clamp((os.clock() - t0) / duration, 0, 1)
+		-- ease out
+		p = 1 - (1 - p) * (1 - p)
+		fill.Size = UDim2.new(p, 0, 1, 0)
+		local n = math.floor(p * 100)
+		pct.Text = tostring(n) .. "%"
+		local idx = math.clamp(math.floor(p * #statusLines) + 1, 1, #statusLines)
+		sub.Text = statusLines[idx]
+		task.wait(0.03)
+	end
+	fill.Size = UDim2.new(1, 0, 1, 0)
+	pct.Text = "100%"
+	sub.Text = "access granted"
+	task.wait(0.35)
+
+	running = false
+	if conn then conn:Disconnect() end
+
+	-- Fade out
+	for i = 0, 10 do
+		local a = i / 10
+		bg.BackgroundTransparency = a
+		title.TextTransparency = a
+		sub.TextTransparency = a
+		pct.TextTransparency = a
+		track.BackgroundTransparency = a
+		fill.BackgroundTransparency = a
+		trackStroke.Transparency = a
+		for _, c in ipairs(columns) do
+			c.label.TextTransparency = math.clamp(c.label.TextTransparency + 0.1, 0, 1)
+		end
+		task.wait(0.03)
+	end
+	sg:Destroy()
+end
+
 -- ===== Tiền x 06 Extra HUD: FPS / MS / IP (top center) =====
 task.spawn(function()
 	local Players = game:GetService("Players")
