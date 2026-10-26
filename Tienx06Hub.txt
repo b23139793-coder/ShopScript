@@ -1,233 +1,3 @@
---[[ Tiền x 06 Hub | Protected ]]
-local _K = {
-["Fish-A7K9M2QX"]=true,["Fish-B4N8T6LP"]=true,["Fish-C3R5W9HJ"]=true,["Fish-D8F2K7VN"]=true,
-["Fish-E6M4P9XZ"]=true,["Fish-F2Q8L5RT"]=true,["Fish-G9H3N6KW"]=true,["Fish-H5V7C2MP"]=true,
-["Fish-J4X9R6BN"]=true,["Fish-K8T2W5QZ"]=true,["Fish-L3P7M4HJ"]=true,["Fish-M6N9K2XV"]=true,
-["Fish-N5R4T8QC"]=true,["Fish-P7W3H6LK"]=true,["Fish-Q2Z8V5MN"]=true,["Fish-R9C4X7TP"]=true,
-["Fish-S6K2J8WH"]=true,["Fish-T3M5Q9VX"]=true,["Fish-V8L4N2RK"]=true,["Fish-W7H6P3CZ"]=true,
-["Fish-X5Q9T4MJ"]=true,["Fish-Y2N8K6VP"]=true,["Fish-Z4R7C3HL"]=true,["Fish-2K9M5XQW"]=true,
-["Fish-3V6P8NRT"]=true,["Fish-4H2J7KMC"]=true,["Fish-5Q8W3LNZ"]=true,["Fish-6T4X9RVP"]=true,
-["Fish-7M3C5HJK"]=true,["Fish-8N6V2QWL"]=true,["Fish-9P5R7TXM"]=true,["Fish-A2V8K4NJ"]=true,
-["Fish-B6Q3M9XL"]=true,["Fish-C7T5H2RW"]=true,["Fish-D4N8P6VK"]=true,["Fish-E9X2L7QM"]=true,
-["Fish-F5J3R8WN"]=true,["Fish-G2K6V4TP"]=true,["Fish-H8M9Q5XC"]=true,["Fish-J7L4N2RV"]=true,
-["Fish-K3W6P9HZ"]=true,["Fish-L9R2X5MC"]=true,["Fish-M4T8Q7VN"]=true,["Fish-N6C3K9WL"]=true,
-["Fish-P2H5V8RX"]=true,["Fish-Q7M4J3TZ"]=true,["Fish-R5N9W2KC"]=true,["Fish-S8X6L4VP"]=true,
-["Fish-T2Q7M5HN"]=true,["Fish-V4K9R3XC"]=true,["Fish-W6P2N8TJ"]=true,["Fish-X3H7Q5MV"]=true,
-["Fish-Y9L4C2RK"]=true,["Fish-Z5T8N6WP"]=true,["Fish-2M7V4QXC"]=true,["Fish-3K5R9HNW"]=true,
-["Fish-4P8T2LJM"]=true,["Fish-5X6N3VQK"]=true,["Fish-6C9W4RHT"]=true,["Fish-7Q2M8PXL"]=true,
-["Fish-8R5K3NVC"]=true,["Fish-9T4H7WQM"]=true,["Fish-A5N2X8RL"]=true,["Fish-B9V4K6TP"]=true,
-["Fish-C2M7Q5WX"]=true,["Fish-D6R3N8HJ"]=true,["Fish-E4K9T2VP"]=true,["Fish-F8W5L3QM"]=true,
-["Fish-G6P2X9RN"]=true,["Fish-H3T7K4VC"]=true,["Fish-J9M5Q2WL"]=true,["Fish-K2R8N6XP"]=true,
-["Fish-L5V3H9QT"]=true,["Fish-M8Q4W2KC"]=true,["Fish-N3X7P5RL"]=true,["Fish-P9H2T6VM"]=true,
-["Fish-Q4K8R3WX"]=true,["Fish-R2V6M9TN"]=true,["Fish-S5L3Q8KP"]=true,["Fish-T9N4X2HC"]=true,
-["Fish-V3W7K5QM"]=true,["Fish-W8R2P6LX"]=true,["Fish-X4M9T3VK"]=true,["Fish-Y6Q2N8RP"]=true,
-["Fish-Z3H5W7KC"]=true,["Fish-2N8X4MQL"]=true,["Fish-3R6V9TPK"]=true,["Fish-4W2K7HNX"]=true,
-["Fish-5M9Q3VCL"]=true,["Fish-6P4T8RJK"]=true,["Fish-7X3N5WQM"]=true,["Fish-8K6H2VRT"]=true,
-["Fish-9C5M7PXL"]=true,["Fish-A8R3T6QN"]=true,["Fish-B2W9K5MV"]=true,["Fish-C5L7X3RP"]=true,
-["Fish-D9Q4N2WK"]=true,["Fish-E3V6M8HT"]=true,["Fish-F7K2R5XN"]=true,["Fish-G4P9W3LC"]=true,
-["Fish-H6N2T8QV"]=true,["Fish-J5X3M7RK"]=true,
-}
-local _KF = "Tienx06_Auth.dat"
-local function _loadKey()
-	return false -- luon nhap key moi lan
-end
-local function _saveKey(k)
-	-- khong luu key
-end
-
-pcall(function()
-	if type(isfolder)=="function" then end
-	if type(delfile)=="function" and type(isfile)=="function" and isfile(_KF) then delfile(_KF) end
-end)
-if not _loadKey() then
-	local done = false
-	local TweenService = game:GetService("TweenService")
-	local cg = game:GetService("CoreGui")
-	local sg = Instance.new("ScreenGui")
-	sg.Name = "Tienx06_Key"
-	sg.IgnoreGuiInset = true
-	sg.ResetOnSpawn = false
-	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	pcall(function() sg.Parent = (gethui and gethui()) or cg end)
-	if not sg.Parent then sg.Parent = cg end
-
-	-- Full dark blur overlay
-	local ov = Instance.new("Frame")
-	ov.Size = UDim2.new(1,0,1,0)
-	ov.BackgroundColor3 = Color3.fromRGB(5,5,10)
-	ov.BackgroundTransparency = 0.25
-	ov.BorderSizePixel = 0
-	ov.Parent = sg
-
-	-- Main card
-	local card = Instance.new("Frame")
-	card.AnchorPoint = Vector2.new(0.5,0.5)
-	card.Position = UDim2.new(0.5,0,0.5,0)
-	card.Size = UDim2.new(0,0,0,0)
-	card.BackgroundColor3 = Color3.fromRGB(14,12,16)
-	card.BorderSizePixel = 0
-	card.ClipsDescendants = true
-	card.Parent = sg
-	Instance.new("UICorner", card).CornerRadius = UDim.new(0,18)
-
-	local cardStroke = Instance.new("UIStroke", card)
-	cardStroke.Color = Color3.fromRGB(220,40,40)
-	cardStroke.Thickness = 2
-	cardStroke.Transparency = 0.1
-
-	-- Top gradient bar
-	local topBar = Instance.new("Frame")
-	topBar.Size = UDim2.new(1,0,0,4)
-	topBar.BorderSizePixel = 0
-	topBar.Parent = card
-	local grad = Instance.new("UIGradient", topBar)
-	grad.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(180,20,20)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,70,70)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(255,120,60))
-	})
-
-	-- Soft red glow behind card
-	local glow = Instance.new("ImageLabel")
-	glow.AnchorPoint = Vector2.new(0.5,0.5)
-	glow.Position = UDim2.new(0.5,0,0.5,0)
-	glow.Size = UDim2.new(1,80,1,80)
-	glow.BackgroundTransparency = 1
-	glow.Image = "rbxassetid://5028857084"
-	glow.ImageColor3 = Color3.fromRGB(220,40,40)
-	glow.ImageTransparency = 0.75
-	glow.ZIndex = 0
-	glow.Parent = card
-
-	-- Title
-	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1,-40,0,34)
-	title.Position = UDim2.new(0,20,0,28)
-	title.BackgroundTransparency = 1
-	title.Font = Enum.Font.Arcade
-	title.Text = "TIEN X 06 HUB"
-	title.TextColor3 = Color3.fromRGB(255,80,80)
-	title.TextSize = 26
-	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.Parent = card
-
-	local badge = Instance.new("Frame")
-	badge.Size = UDim2.new(0,64,0,22)
-	badge.Position = UDim2.new(1,-84,0,34)
-	badge.BackgroundColor3 = Color3.fromRGB(220,40,40)
-	badge.BackgroundTransparency = 0.15
-	badge.BorderSizePixel = 0
-	badge.Parent = card
-	Instance.new("UICorner", badge).CornerRadius = UDim.new(0,6)
-	local badgeTxt = Instance.new("TextLabel")
-	badgeTxt.Size = UDim2.new(1,0,1,0)
-	badgeTxt.BackgroundTransparency = 1
-	badgeTxt.Font = Enum.Font.Arcade
-	badgeTxt.Text = "KEY"
-	badgeTxt.TextColor3 = Color3.fromRGB(255,255,255)
-	badgeTxt.TextSize = 12
-	badgeTxt.Parent = badge
-
-	local sub = Instance.new("TextLabel")
-	sub.Size = UDim2.new(1,-40,0,20)
-	sub.Position = UDim2.new(0,20,0,66)
-	sub.BackgroundTransparency = 1
-	sub.Font = Enum.Font.Arcade
-	sub.Text = "Nhap key de mo khoa  •  1 thiet bi"
-	sub.TextColor3 = Color3.fromRGB(160,140,140)
-	sub.TextSize = 13
-	sub.TextXAlignment = Enum.TextXAlignment.Left
-	sub.Parent = card
-
-	-- Input
-	local boxHold = Instance.new("Frame")
-	boxHold.Size = UDim2.new(1,-40,0,50)
-	boxHold.Position = UDim2.new(0,20,0,105)
-	boxHold.BackgroundColor3 = Color3.fromRGB(28,18,20)
-	boxHold.BorderSizePixel = 0
-	boxHold.Parent = card
-	Instance.new("UICorner", boxHold).CornerRadius = UDim.new(0,12)
-	local boxSt = Instance.new("UIStroke", boxHold)
-	boxSt.Color = Color3.fromRGB(80,30,30)
-	boxSt.Thickness = 1.2
-
-	local box = Instance.new("TextBox")
-	box.Size = UDim2.new(1,-24,1,0)
-	box.Position = UDim2.new(0,12,0,0)
-	box.BackgroundTransparency = 1
-	box.Font = Enum.Font.Arcade
-	box.PlaceholderText = "Fish-XXXXXXXX"
-	box.PlaceholderColor3 = Color3.fromRGB(100,70,70)
-	box.Text = ""
-	box.TextColor3 = Color3.fromRGB(255,230,230)
-	box.TextSize = 16
-	box.TextXAlignment = Enum.TextXAlignment.Left
-	box.ClearTextOnFocus = false
-	box.Parent = boxHold
-
-	local status = Instance.new("TextLabel")
-	status.Size = UDim2.new(1,-40,0,18)
-	status.Position = UDim2.new(0,20,0,165)
-	status.BackgroundTransparency = 1
-	status.Font = Enum.Font.Arcade
-	status.Text = ""
-	status.TextColor3 = Color3.fromRGB(255,80,80)
-	status.TextSize = 12
-	status.TextXAlignment = Enum.TextXAlignment.Left
-	status.Parent = card
-
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1,-40,0,48)
-	btn.Position = UDim2.new(0,20,0,195)
-	btn.BackgroundColor3 = Color3.fromRGB(200,35,35)
-	btn.BorderSizePixel = 0
-	btn.Font = Enum.Font.Arcade
-	btn.Text = "XAC NHAN KEY  →"
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.TextSize = 16
-	btn.AutoButtonColor = false
-	btn.Parent = card
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,12)
-
-	btn.MouseEnter:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255,55,55)}):Play()
-	end)
-	btn.MouseLeave:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(200,35,35)}):Play()
-	end)
-
-	-- Open animation
-	TweenService:Create(card, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Size = UDim2.new(0, 380, 0, 270)
-	}):Play()
-
-	local function tryKey()
-		local k = (box.Text or ""):match("^%s*(.-)%s*$")
-		if _K[k] then
-			-- no save
-			status.TextColor3 = Color3.fromRGB(80,220,120)
-			status.Text = "Key hop le! Dang vao Hub..."
-			btn.Text = "THANH CONG"
-			btn.BackgroundColor3 = Color3.fromRGB(40,160,80)
-			task.wait(0.55)
-			sg:Destroy()
-			done = true
-		else
-			status.TextColor3 = Color3.fromRGB(255,70,70)
-			status.Text = "Key khong dung • Thu lai"
-			TweenService:Create(boxHold, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(50,15,18)}):Play()
-			task.wait(0.5)
-			TweenService:Create(boxHold, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(28,18,20)}):Play()
-		end
-	end
-	btn.MouseButton1Click:Connect(tryKey)
-	box.FocusLost:Connect(function(e) if e then tryKey() end end)
-
-	repeat task.wait(0.12) until done
-end
-
-
-
 -- ===== Tiền x 06 Extra HUD: FPS / MS / IP (top center) =====
 task.spawn(function()
 	local Players = game:GetService("Players")
@@ -270,7 +40,7 @@ task.spawn(function()
 	stats.Parent = sg
 	Instance.new("UICorner", stats).CornerRadius = UDim.new(0, 8)
 	local stStroke = Instance.new("UIStroke", stats)
-	stStroke.Color = Color3.fromRGB(220, 40, 40)
+	stStroke.Color = Color3.fromRGB(255, 0, 128)
 	stStroke.Thickness = 1
 
 	local layout = Instance.new("UIListLayout")
@@ -1427,8 +1197,8 @@ local Theme = {
 	TextPrimary = Color3.fromRGB(242, 245, 250),
 	TextSecondary = Color3.fromRGB(165, 174, 192),
 	TextMuted = Color3.fromRGB(108, 117, 138),
-	Border = Color3.fromRGB(180, 40, 40),
-	BorderAccent = Color3.fromRGB(255, 70, 70),
+	Border = Color3.fromRGB(120, 80, 160),
+	BorderAccent = Color3.fromRGB(255, 120, 200),
 	FontBold = Enum.Font.Arcade,
 	FontSemi = Enum.Font.Arcade,
 	FontReg = Enum.Font.Arcade,
@@ -2075,6 +1845,52 @@ function Library:Window(winOpts)
 	local mainStroke = addStroke(mainFrame, Theme.Border, 2.2, 0)
 	mainFrame.BackgroundTransparency = 0.3
 
+	-- Rainbow border (7 colors)
+	task.spawn(function()
+		local rainbow = {
+			Color3.fromRGB(255, 0, 0),
+			Color3.fromRGB(255, 127, 0),
+			Color3.fromRGB(255, 255, 0),
+			Color3.fromRGB(0, 255, 0),
+			Color3.fromRGB(0, 128, 255),
+			Color3.fromRGB(75, 0, 255),
+			Color3.fromRGB(148, 0, 211),
+		}
+		local idx = 1
+		while mainFrame and mainFrame.Parent do
+			local c1 = rainbow[idx]
+			local c2 = rainbow[idx % #rainbow + 1]
+			for step = 0, 1, 0.05 do
+				if not mainFrame or not mainFrame.Parent then break end
+				local col = c1:Lerp(c2, step)
+				pcall(function()
+					if mainStroke then mainStroke.Color = col end
+					Theme.Border = col
+					Theme.BorderAccent = col
+					Theme.Accent = col
+				end)
+				-- Update visible strokes on main window
+				pcall(function()
+					for _, d in ipairs(mainFrame:GetDescendants()) do
+						if d:IsA("UIStroke") then
+							d.Color = col
+						end
+					end
+					if floatBtn then
+						for _, d in ipairs(floatBtn:GetDescendants()) do
+							if d:IsA("UIStroke") then d.Color = col end
+						end
+						local fs = floatBtn:FindFirstChildOfClass("UIStroke")
+						if fs then fs.Color = col end
+					end
+				end)
+				task.wait(0.03)
+			end
+			idx = idx % #rainbow + 1
+		end
+	end)
+
+
 	local bgImage = Instance.new("ImageLabel")
 	bgImage.Name = "BgImage"
 	bgImage.Size = UDim2.new(1, 0, 1, 0)
@@ -2155,16 +1971,16 @@ function Library:Window(winOpts)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = topBar,
 	})
-	-- Badge VIET HOA like screenshot
+	-- Badge V2
 	local vietBadge = create("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -90, 0.5, 0),
-		Size = UDim2.new(0, 100, 0, 24),
-		BackgroundColor3 = Color3.fromRGB(255, 160, 0),
+		Size = UDim2.new(0, 48, 0, 24),
+		BackgroundColor3 = Color3.fromRGB(40, 40, 50),
 		Font = Theme.FontBold,
-		Text = "VIỆT HÓA",
+		Text = "V2",
 		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextSize = 12,
+		TextSize = 13,
 		Parent = topBar,
 	})
 	addCorner(vietBadge, 8)
@@ -2187,7 +2003,7 @@ function Library:Window(winOpts)
 		Size = UDim2.new(0, 44, 0, 22),
 		BackgroundColor3 = Theme.BgCard,
 		Font = Theme.FontBold,
-		Text = "v" .. tostring(winOpts.Version or "1.0"),
+		Text = "v" .. tostring(winOpts.Version or "2.0"),
 		TextColor3 = Theme.Accent,
 		TextSize = 11,
 		Parent = topBar,
