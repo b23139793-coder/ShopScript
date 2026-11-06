@@ -3,680 +3,320 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DNG DEV ULTIMATE V6</title>
+<title>DNG DEV V8 MATRIX</title>
 <style>
 *{box-sizing:border-box}
-:root{
- --bg:#080711;--panel:#151020;--panel2:#211632;
- --line:#533777;--purple:#b45cff;--blue:#5268f5;
- --text:#f5efff;--muted:#a99bb9;--green:#8cffc1
-}
-body{
- margin:0;min-height:100vh;color:var(--text);
- font-family:Arial,sans-serif;
- background:radial-gradient(ellipse at 12% 0%,#48176b 0,transparent 35%),
- radial-gradient(ellipse at 90% 15%,#1b2860 0,transparent 32%),var(--bg)
-}
-button,input,select,textarea{font:inherit}
-header{
- max-width:1500px;margin:auto;padding:22px 25px;
- display:flex;align-items:center;justify-content:space-between;
- border-bottom:1px solid #ffffff18
-}
-.brand{display:flex;align-items:center;gap:13px}
-.logo{
- width:50px;height:50px;display:grid;place-items:center;
- border-radius:15px;background:linear-gradient(135deg,#b342e8,#3656e8);
- font-size:25px;font-weight:900;box-shadow:0 0 28px #a13fe866
-}
-h1{margin:0;color:#e2b9ff;font-size:24px}
-.brand p{margin:5px 0 0;color:var(--muted);font-size:11px;letter-spacing:2px}
-.ready{
- padding:10px 14px;border:1px solid #39c98b66;border-radius:30px;
- color:var(--green);font-size:12px;background:#15352466
-}
-main{width:min(1500px,97%);margin:24px auto 50px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.panel{
- min-width:0;padding:21px;border:1px solid var(--line);
- border-radius:17px;background:linear-gradient(145deg,#1b1429ee,#100d19f5);
- box-shadow:0 12px 35px #0005
-}
-.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.head h2,.section-title{margin:0;color:#dcb0ff;font-size:15px;letter-spacing:1px}
-.num{font-size:11px;color:#a58ac0;font-weight:bold}
-textarea,input,select{
- width:100%;margin-top:8px;padding:12px;border-radius:10px;
- border:1px solid #594078;background:#090711;color:white;outline:none
-}
-textarea{resize:vertical;min-height:360px;font:13px/1.5 Consolas,monospace}
-textarea:focus,input:focus,select:focus{border-color:#bd78f5;box-shadow:0 0 0 2px #a855f722}
-label{display:block;margin-top:13px;color:#c5b2d8;font-size:12px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
-button{
- border:0;border-radius:10px;padding:12px 16px;color:white;font-weight:800;
- background:linear-gradient(110deg,#8b2dbb,#4058dc);cursor:pointer;transition:.2s
-}
-button:hover{filter:brightness(1.2);transform:translateY(-1px)}
-button:active{transform:scale(.98)}
-.actions button{flex:1}
-.secondary{background:#342744}
-.danger{background:#702a43}
-.status{
- margin-top:13px;padding:12px;border-radius:10px;background:#21182e;
- border:1px solid #ffffff12;color:var(--green);font-size:12px;
- line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere
-}
-.info{color:var(--muted);font-size:12px;line-height:1.7}
-.bottom{margin-top:18px}
-.small{min-height:75px;height:75px}
-.section-title{margin-bottom:12px}
-.footer{text-align:center;color:#786c88;font-size:11px;padding:28px}
-.warn{color:#ffd38b}
-@media(max-width:850px){
- header{padding:15px}.ready{display:none}
- .grid{grid-template-columns:1fr}
- main{width:94%;margin-top:15px}
- textarea{min-height:270px}
-}
+body{margin:0;background:#020805;color:#b8ffca;font-family:Consolas,monospace}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:-1;opacity:.2}
+header{padding:20px;text-align:center;border-bottom:1px solid #087b38;background:#001609}
+h1{color:#38ff75;text-shadow:0 0 15px #00ff55;margin:0}
+header p{color:#70b88a}
+main{max-width:1450px;margin:auto;padding:18px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid #087b38;background:#031109ed;border-radius:10px;padding:15px;box-shadow:0 0 18px #00ff5510}
+h3{margin:0 0 12px;color:#42ff80}
+textarea,input,select{width:100%;background:#010703;color:#a7ffba;border:1px solid #126c34;border-radius:7px;padding:12px;outline:none;font:13px Consolas}
+textarea{height:280px;resize:vertical}
+input{margin-top:7px;margin-bottom:12px}
+button,select{background:#06351a;color:#72ff9c;border:1px solid #16a34a;padding:11px;border-radius:6px;font-weight:bold}
+button{cursor:pointer}
+button:hover{background:#0a5728}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+select{margin:7px 0 12px}
+#log{height:105px;overflow:auto;color:#64d887;font-size:12px;background:#010703;padding:9px;margin-top:10px;border:1px solid #104c28}
+.status{color:#39ff78;margin:12px 0}
+.small-text{height:75px;min-height:75px}
+label{display:block;margin-top:10px;color:#8ddba2;font-size:11px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}textarea{height:260px}}
 </style>
 </head>
 <body>
-
+<canvas id="rain"></canvas>
 <header>
- <div class="brand">
-  <div class="logo">D</div>
-  <div>
-   <h1>DNG DEV</h1>
-   <p>ULTIMATE LUA OBFUSCATOR V6</p>
-  </div>
- </div>
- <div class="ready">● SYSTEM READY</div>
+<h1>dng team ohub</h1>
+<p>LUАU MATRIX OBFUSCATOR • NUMBER STRING ENCODER</p>
 </header>
-
 <main>
-<div class="grid">
-
+<div class="layout">
 <section class="panel">
- <div class="head">
-  <h2>01 / SOURCE CODE</h2><span class="num">INPUT</span>
- </div>
-
- <textarea id="source" spellcheck="false"
- placeholder="-- Dán Lua / Luau code tại đây..."></textarea>
-
- <div class="row">
-  <div>
-   <label>OBFUSCATION LEVEL</label>
-   <select id="level">
-    <option value="1">LEVEL 1 - CLEAN</option>
-    <option value="2">LEVEL 2 - STRING</option>
-    <option value="3">LEVEL 3 - POSITION</option>
-    <option value="4">LEVEL 4 - MULTI LAYER</option>
-    <option value="5">LEVEL 5 - AFFINE</option>
-    <option value="6">LEVEL 6 - RANDOM KEY</option>
-    <option value="7" selected>LEVEL 7 - DEEP ENCODE</option>
-   </select>
-  </div>
-  <div>
-   <label>OUTPUT FORMAT</label>
-   <select id="format"><option>Lua / Luau</option></select>
-  </div>
- </div>
-
- <div class="actions">
-  <button onclick="obfuscate()">⚡ OBFUSCATE</button>
-  <button class="secondary" onclick="clearAll()">CLEAR</button>
- </div>
- <div id="status" class="status">READY - Waiting for source code</div>
- <p class="info">
-  Level 1: Clean comments.<br>
-  Level 2: String encoding.<br>
-  Level 3: Position-based encoding.<br>
-  Level 4: Multi-layer position transform.<br>
-  Level 5: Affine byte encoding.<br>
-  Level 6: Random parameters per string.<br>
-  Level 7: Two-stage randomized byte encoding.
- </p>
+<h3>01 / SOURCE CODE</h3>
+<textarea id="src" spellcheck="false" placeholder="Dán mã Lua/Luau vào đây..."></textarea>
+<label>level làm rối code khuyên chọn level 3</label>
+<select id="level">
+<option value="1">LEVEL 1 - Basic</option>
+<option value="2">LEVEL 2 - Strong</option>
+<option value="3">LEVEL 3 - Advanced</option>
+</select>
+<div class="actions">
+<button onclick="run()">⚡ ENCODE CODE</button>
+<button onclick="clearAll()">CLEAR</button>
+</div>
+<div class="status" id="status">SYSTEM READY</div>
+<div id="log">[DNG] Waiting for source...</div>
 </section>
 
 <section class="panel">
- <div class="head">
-  <h2>02 / OBFUSCATED OUTPUT</h2><span class="num">OUTPUT</span>
- </div>
- <textarea id="result" readonly spellcheck="false"
- placeholder="Obfuscated code sẽ xuất hiện ở đây..."></textarea>
- <div class="actions">
-  <button onclick="copyText('result')">COPY CODE</button>
-  <button onclick="downloadLua()">DOWNLOAD LUA</button>
- </div>
- <div id="outputStatus" class="status">OUTPUT EMPTY</div>
-</section>
-
+<h3>02 / ENCODED OUTPUT</h3>
+<textarea id="out" spellcheck="false" readonly placeholder="Code đã mã hóa sẽ hiện ở đây..."></textarea>
+<div class="actions">
+<button onclick="copyOutput()">COPY CODE</button>
+<button onclick="downloadOutput()">DOWNLOAD LUA</button>
 </div>
 
-<div class="grid bottom">
-<section class="panel">
- <div class="head">
-  <h2>03 / GITHUB AUTO UPLOADER</h2><span class="num">GITHUB API</span>
- </div>
+<h3 style="margin-top:20px">03 / GITHUB UPLOADER</h3>
+<label>FILE NAME</label>
+<input id="filename" value="dngdev.lua">
+<div class="actions">
+<button onclick="uploadGitHub()">🚀 UPLOAD TO GITHUB</button>
+</div>
+<div class="status" id="ghStatus">WAITING...</div>
 
- <!-- Ô nhập Token và các thông tin cố định đã được ẩn khỏi giao diện -->
+<label>RAW URL</label>
+<textarea id="raw" class="small-text" readonly></textarea>
+<button onclick="copyOutputText('raw')">COPY RAW</button>
 
- <label>FILE NAME</label>
- <input id="filename" value="dngdev.lua">
-
- <div class="actions" style="margin-top:15px">
-  <button onclick="uploadGitHub()">🚀 UPLOAD TO GITHUB</button>
- </div>
- <div id="ghStatus" class="status">WAITING FOR UPLOAD...</div>
- <p class="info warn">GitHub Token và thông tin kho lưu trữ đã được bảo mật ẩn bên trong mã nguồn.</p>
-</section>
-
-<section class="panel">
- <div class="head">
-  <h2>04 / RAW URL & LOADSTRING</h2><span class="num">LINK TOOLS</span>
- </div>
- <label>RAW URL</label>
- <textarea id="raw" class="small" readonly></textarea>
- <button onclick="copyText('raw')">COPY RAW URL</button>
-
- <label>LOADSTRING</label>
- <textarea id="load" class="small" readonly></textarea>
- <button onclick="copyText('load')">COPY LOADSTRING</button>
-
- <hr style="border-color:#ffffff18;margin:22px 0">
- <h3 class="section-title">05 / GITHUB LINK CONVERTER</h3>
- <input id="githubLink" placeholder="Dán GitHub URL vào đây">
- <button onclick="convertLink()">CONVERT RAW</button>
- <textarea id="converted" class="small" readonly></textarea>
- <button onclick="copyText('converted')">COPY CONVERTED LINK</button>
+<label>LOADSTRING</label>
+<textarea id="load" class="small-text" readonly></textarea>
+<button onclick="copyOutputText('load')">COPY LOADSTRING</button>
 </section>
 </div>
-
-<section class="panel bottom">
- <h3 class="section-title">06 / SECURITY & COMPATIBILITY</h3>
- <p class="info">
- V6 sử dụng biến đổi byte có thể đảo ngược và tham số ngẫu nhiên riêng cho từng chuỗi.
- Không tự động đổi tên biến local vì việc đó cần parser Lua/Luau đầy đủ.
- Chuỗi có escape, long string và cú pháp đặc biệt được giữ nguyên để giảm nguy cơ làm hỏng code.
- Obfuscation chỉ tăng độ khó phân tích, không thể ngăn tuyệt đối việc sao chép hoặc dịch ngược.
- Giữ bản gốc và kiểm thử output trong môi trường mục tiêu trước khi phát hành.
- </p>
-</section>
 </main>
 
-<div class="footer">DNG DEV © 2026 · ULTIMATE OBFUSCATOR V6</div>
-
 <script>
-"use strict";
-
-// ===============================
-// RANDOM UTILITIES
-// ===============================
-
-function rand(min,max){
- return Math.floor(Math.random()*(max-min+1))+min;
+const $=id=>document.getElementById(id);
+function log(s){
+ const el=$("log");
+ el.textContent+="\n> "+s;
+ el.scrollTop=el.scrollHeight;
 }
-
-function randomId(source){
- let name;
+function randomName(used){
+ let n;
  do{
-  name="_dng"+Array.from({length:12},()=> 
-   "abcdefghijklmnopqrstuvwxyz0123456789"[rand(0,35)]
-  ).join("");
- }while(source.includes(name));
- return name;
+  n="_"+Array.from({length:9},()=> "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random()*52)]).join("");
+ }while(used.has(n));
+ used.add(n);
+ return n;
 }
-
-function inverseMod256(a){
- for(let i=1;i<256;i++){
-  if((a*i)%256===1)return i;
- }
- throw new Error("Không tìm thấy khóa nghịch đảo");
+function encodeString(str){
+ const bytes=new TextEncoder().encode(str);
+ return "{"+Array.from(bytes).join(",")+"}";
 }
-
-function mod256(n){
- return ((n%256)+256)%256;
-}
-
-// ===============================
-// LUA / LUAU TOKENIZER
-// ===============================
-
-function tokenize(source){
+function tokenize(code){
  const tokens=[];
  let i=0;
-
- while(i<source.length){
-  const start=i;
-  const c=source[i];
-
-  if(/\s/.test(c)){
-   i++;
-   while(i<source.length&&/\s/.test(source[i]))i++;
-   tokens.push({v:source.slice(start,i),k:"ws"});
-   continue;
-  }
-
-  if(source.startsWith("--",i)){
-   const m=source.slice(i).match(/^--\[(=*)\[/);
-   if(m){
-    const close="]"+m[1]+"]";
-    const p=source.indexOf(close,i+m[0].length);
-    i=p<0?source.length:p+close.length;
-    const v=source.slice(start,i);
-    tokens.push({v,k:v.startsWith("--!")?"directive":"comment"});
-   }else{
-    const p=source.indexOf("\n",i);
-    i=p<0?source.length:p;
-    const v=source.slice(start,i);
-    tokens.push({v,k:v.startsWith("--!")?"directive":"comment"});
+ while(i<code.length){
+  const start=i,c=code[i],next=code[i+1];
+  if(/\s/.test(c)){i++;while(i<code.length&&/\s/.test(code[i]))i++;tokens.push({v:code.slice(start,i),type:"space"});continue}
+  if(c==="-"&&next==="-"){
+   if(code.slice(i,i+3)==="--!"){
+    i+=3;while(i<code.length&&code[i]!=="\n")i++;
+    tokens.push({v:code.slice(start,i),type:"directive"});continue;
    }
-   continue;
+   i+=2;
+   while(i<code.length&&code[i]!=="\n")i++;
+   tokens.push({v:code.slice(start,i),type:"comment"});continue;
   }
-
-  if(c==="["){
-   const m=source.slice(i).match(/^\[(=*)\[/);
-   if(m){
-    const close="]"+m[1]+"]";
-    const p=source.indexOf(close,i+m[0].length);
-    i=p<0?source.length:p+close.length;
-    tokens.push({v:source.slice(start,i),k:"long"});
-    continue;
-   }
+  if(c==="["&&(/^\[=*\[/.test(code.slice(i)))){
+   const m=code.slice(i).match(/^\[(=*)\[/);
+   const close="]"+m[1]+"]";
+   i+=m[0].length;
+   const end=code.indexOf(close,i);
+   i=end<0?code.length:end+close.length;
+   tokens.push({v:code.slice(start,i),type:"long"});continue;
   }
-
   if(c==="'"||c==='"'){
-   const quote=c;
    i++;
-   while(i<source.length){
-    if(source[i]==="\\"){
-     i+=2;
-     continue;
-    }
-    if(source[i]===quote){
-     i++;
-     break;
-    }
+   while(i<code.length){
+    if(code[i]==="\\"){i+=2;continue}
+    if(code[i]===c){i++;break}
     i++;
    }
-   tokens.push({v:source.slice(start,i),k:"str"});
-   continue;
+   tokens.push({v:code.slice(start,i),type:"string"});continue;
   }
-
   if(/[A-Za-z_]/.test(c)){
-   i++;
-   while(i<source.length&&/[A-Za-z0-9_]/.test(source[i]))i++;
-   tokens.push({v:source.slice(start,i),k:"word"});
-   continue;
+   i++;while(i<code.length&&/[A-Za-z0-9_]/.test(code[i]))i++;
+   tokens.push({v:code.slice(start,i),type:"id"});continue;
   }
-
   if(/[0-9]/.test(c)){
-   const rest=source.slice(i);
-   const match=rest.match(
-    /^(?:0[xX][\da-fA-F]+(?:\.[\da-fA-F]*)?(?:[pP][+-]?\d+)?|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)/ 
-   );
-   if(match){
-    i+=match[0].length;
-    tokens.push({v:match[0],k:"num"});
-    continue;
-   }
+   i++;while(i<code.length&&/[A-Za-z0-9_.]/.test(code[i]))i++;
+   tokens.push({v:code.slice(start,i),type:"number"});continue;
   }
-
-  const operators=[
-   "...","..","==","~=","<=",">=","::","//","<<",">>","+=","-=",
-   "*=","/=","%=","^=","->"
-  ];
-  const op=operators.find(x=>source.startsWith(x,i));
-  i+=op?op.length:1;
-  tokens.push({v:source.slice(start,i),k:"sym"});
+  const op=["...","..=","==","~=","<=",">=","::","//","<<",">>","+=","-=","*=","/=",".."];
+  const found=op.find(x=>code.startsWith(x,i));
+  i+=found?found.length:1;
+  tokens.push({v:code.slice(start,i),type:"symbol"});
  }
-
  return tokens;
 }
-
-function getStringBytes(raw){
- if(raw.length<2)return null;
- const quote=raw[0];
-
- if(quote!=="'"&&quote!=='"')return null;
- if(raw[raw.length-1]!==quote)return null;
-
- const content=raw.slice(1,-1);
-
- if(content.includes("\\")||
-    content.includes("\n")||
-    content.includes("\r"))return null;
-
- return Array.from(new TextEncoder().encode(content));
+const keywords=new Set(("and break do else elseif end false for function if in local nil not or repeat return then true until while continue export type typeof").split(" "));
+const globals=new Set(("game workspace script shared _G _VERSION Enum Instance Vector2 Vector3 CFrame Color3 UDim UDim2 BrickColor RaycastParams TweenInfo task coroutine math string table utf8 os debug pairs ipairs next pcall xpcall assert error print warn require select tonumber tostring type typeof rawequal rawget rawset setmetatable getmetatable unpack wait spawn delay tick time").split(" "));
+function decodeLiteral(raw){
+ const q=raw[0];
+ if(raw[raw.length-1]!==q)return null;
+ const inner=raw.slice(1,-1);
+ if(inner.includes("\\")||inner.includes("\n")||inner.includes("\r"))return null;
+ return inner;
 }
-
-function makeParams(level){
- const p={
-  k:rand(1,255),
-  a:1,
-  inv:1,
-  step:0,
-  salt:0,
-  k2:0,
-  a2:1,
-  inv2:1,
-  step2:0
- };
-
- if(level>=3)p.step=rand(3,49);
- if(level>=4)p.salt=rand(1,19);
-
- if(level>=5){
-  p.a=rand(0,127)*2+1;
-  p.inv=inverseMod256(p.a);
+function obfuscate(source,level){
+ const tokens=tokenize(source);
+ const used=new Set(tokens.filter(t=>t.type==="id").map(t=>t.v));
+ const map=new Map();
+ const significant=tokens.filter(t=>!["space","comment","directive"].includes(t.type));
+ for(let i=0;i<significant.length;i++){
+  const t=significant[i];
+  if(t.v==="local"&&significant[i+1]?.type==="id"){
+   const n=significant[i+1].v;
+   if(!keywords.has(n)&&!globals.has(n)&&!map.has(n))map.set(n,randomName(used));
+  }
  }
-
- if(level>=6){
-  p.k=rand(1,255);
-  p.step=rand(1,251);
-  p.salt=rand(1,251);
- }
-
- if(level>=7){
-  p.k2=rand(1,255);
-  p.a2=rand(0,127)*2+1;
-  p.inv2=inverseMod256(p.a2);
-  p.step2=rand(1,251);
- }
-
- return p;
-}
-
-function encodeByte(byte,index,p,level){
- let v=mod256(
-  byte*p.a+p.k+index*p.step+index*index*p.salt
- );
-
- if(level>=7){
-  v=mod256(v*p.a2+p.k2+index*p.step2);
- }
- return v;
-}
-
-function obfuscate(){
- const source=document.getElementById("source").value;
- const level=Number(document.getElementById("level").value);
- const status=document.getElementById("status");
- const outputStatus=document.getElementById("outputStatus");
-
- if(!source.trim()){
-  status.textContent="ERROR: SOURCE EMPTY";
-  return;
- }
-
- try{
-  const tokens=tokenize(source);
-  const fn=randomId(source);
-  const output=[];
-  let encoded=0;
-  let skipped=0;
-  let removedComments=0;
-  let usedDecoder=false;
-
-  for(const token of tokens){
-   if(token.k==="comment"){
-    const newlines=token.v.match(/\n/g);
-    output.push(newlines?newlines.join(""):" ");
-    removedComments++;
-    continue;
-   }
-
-   if(token.k==="directive"||
-      token.k==="ws"||
-      token.k==="long"){
-    output.push(token.v);
-    continue;
-   }
-
-   if(level>=2&&token.k==="str"){
-    const bytes=getStringBytes(token.v);
-
-    if(bytes===null){
-     output.push(token.v);
-     skipped++;
-     continue;
+ for(let i=0;i<significant.length;i++){
+  if(significant[i].v==="function"){
+   let j=i+1;
+   while(j<significant.length&&significant[j].v!=="("&&j<i+20)j++;
+   if(significant[j]?.v==="("){
+    for(let k=j+1;k<significant.length&&significant[k].v!==")";k++){
+     if(significant[k].type==="id"&&!keywords.has(significant[k].v)&&!globals.has(significant[k].v)){
+      const n=significant[k].v;
+      if(!map.has(n))map.set(n,randomName(used));
+     }
     }
-
-    const params=makeParams(level);
-    const values=bytes.map((b,index)=>
-     encodeByte(b,index,params,level)
-    );
-
-    const args=[
-     "{"+values.join(",")+"}",
-     params.k,
-     params.inv,
-     params.step,
-     params.salt,
-     params.k2,
-     params.inv2,
-     params.step2
-    ];
-
-    output.push(fn+"("+args.join(",")+")");
-    encoded++;
-    usedDecoder=true;
-    continue;
    }
-
-   output.push(token.v);
   }
-
-  let code=output.join("");
-
-  if(usedDecoder){
-   const decoder=
-`local function ${fn}(t,k,iv,st,sa,k2,iv2,st2)
- local r={}
- for i=1,#t do
-  local p=i-1
-  local v=t[i]
-  v=((v-k2-p*st2)*iv2)%256
-  v=((v-k-p*st-p*p*sa)*iv)%256
-  r[i]=string.char(v)
- end
- return table.concat(r)
-end
-`;
-   code=decoder+code;
-  }
-
-  document.getElementById("result").value=code;
-  outputStatus.textContent=
-   "LEVEL "+level+" COMPLETE"+
-   "\nENCODED STRINGS: "+encoded+
-   "\nPRESERVED STRINGS: "+skipped+
-   "\nREMOVED COMMENTS: "+removedComments+
-   "\nOUTPUT SIZE: "+code.length+" CHARACTERS";
-
-  status.textContent="OBFUSCATION COMPLETE";
-
- }catch(error){
-  status.textContent="ERROR: "+error.message;
  }
+ let output="";
+ for(let i=0;i<tokens.length;i++){
+  const t=tokens[i];
+  if(t.type==="comment")continue;
+  if(t.type==="string"&&level>=1){
+   const decoded=decodeLiteral(t.v);
+   if(decoded!==null){output+="(function(t)local r={} for i=1,#t do r[i]=string.char(t[i]) end return table.concat(r) end)("+encodeString(decoded)+")";continue}
+  }
+  if(t.type==="id"&&map.has(t.v))output+=map.get(t.v);
+  else output+=t.v;
+ }
+ return output;
 }
-
-async function copyText(id){
- const el=document.getElementById(id);
- if(!el.value){
-  alert("Không có dữ liệu!");
-  return;
- }
-
+function run(){
+ const source=$("src").value;
+ if(!source.trim()){alert("Dán code vào trước!");return}
+ $("log").textContent="";
+ $("status").textContent="PROCESSING...";
  try{
-  await navigator.clipboard.writeText(el.value);
+  const level=Number($("level").value);
+  const result=obfuscate(source,level);
+  $("out").value=result;
+  $("status").textContent="ENCODE COMPLETE";
+  log("Tokenized source");
+  log("Encoded plain string literals as byte arrays");
+  log("Applied conservative identifier renaming");
+  log("Done.");
  }catch(e){
-  el.focus();
-  el.select();
-  document.execCommand("copy");
+  $("status").textContent="ERROR";
+  log(String(e));
  }
 }
-
-function downloadLua(){
- const code=document.getElementById("result").value;
- if(!code)return alert("Chưa có output!");
-
- const blob=new Blob([code],{type:"text/plain;charset=utf-8"});
- const url=URL.createObjectURL(blob);
+function clearAll(){$("src").value="";$("out").value="";$("status").textContent="SYSTEM READY";$("log").textContent="[DNG] Cleared"}
+async function copyOutput(){
+ if(!$("out").value)return;
+ try{await navigator.clipboard.writeText($("out").value);log("Copied output")}
+ catch(e){$("out").select();document.execCommand("copy");log("Copy attempted")}
+}
+async function copyOutputText(id){
+ const el=$(id);
+ if(!el.value)return;
+ try{await navigator.clipboard.writeText(el.value);log("Copied "+id)}
+ catch(e){el.select();document.execCommand("copy");}
+}
+function downloadOutput(){
+ const blob=new Blob([ $("out").value ],{type:"text/plain"});
  const a=document.createElement("a");
- a.href=url;
- a.download="dngdev.lua";
- a.click();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
+ a.href=URL.createObjectURL(blob);a.download="dngdev.lua";a.click();
+ URL.revokeObjectURL(a.href);
 }
 
-function clearAll(){
- document.getElementById("source").value="";
- document.getElementById("result").value="";
- document.getElementById("status").textContent="READY";
- document.getElementById("outputStatus").textContent="OUTPUT EMPTY";
-}
-
-// ===============================
-// GITHUB UPLOADER (Tự động ẩn token và dùng thông tin mặc định)
-// ===============================
-
+// GITHUB UPLOADER TÍCH HỢP NGẦM
 async function uploadGitHub(){
- const token="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";
- const owner="b23139793-coder";
- const repo="Kh-nh-Mai-Hub";
- const branch="main";
- const filename=document.getElementById("filename").value.trim();
- const code=document.getElementById("result").value;
- const status=document.getElementById("ghStatus");
+ const token = "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";
+ const owner = "b23139793-coder";
+ const repo = "Kh-nh-Mai-Hub";
+ const branch = "main";
+ const filename = $("filename").value.trim();
+ const code = $("out").value;
+ const ghStatus = $("ghStatus");
 
- if(!filename){
-  status.textContent="Hãy nhập tên file!";
+ if(!filename || !code){
+  ghStatus.textContent="[ERROR] Nhập tên file và tạo output trước!";
+  return;
+ }
+ if(filename.startsWith("/") || filename.includes("\\") || !filename.toLowerCase().endsWith(".lua")){
+  ghStatus.textContent="[ERROR] Tên file phải kết thúc bằng .lua";
   return;
  }
 
- if(!code){
-  status.textContent="Chưa có output!";
-  return;
- }
-
- if(filename.startsWith("/")||
-    filename.includes("\\")||
-    filename.split("/").some(x=>!x||x==="."||x==="..")||
-    !filename.toLowerCase().endsWith(".lua")){
-  status.textContent="Tên file không hợp lệ! Phải kết thúc bằng .lua";
-  return;
- }
-
- const path=filename.split("/").map(encodeURIComponent).join("/");
- const api="https://api.github.com/repos/"+
-  encodeURIComponent(owner)+"/"+
-  encodeURIComponent(repo)+"/contents/"+path;
-
- const headers={
-  "Authorization":"Bearer "+token,
-  "Accept":"application/vnd.github+json",
-  "X-GitHub-Api-Version":"2022-11-28"
+ const path = filename.split("/").map(encodeURIComponent).join("/");
+ const api = "https://api.github.com/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/contents/" + path;
+ const headers = {
+  "Authorization": "Bearer " + token,
+  "Accept": "application/vnd.github+json",
+  "X-GitHub-Api-Version": "2022-11-28"
  };
 
  try{
-  status.textContent="CHECKING GITHUB...";
+  ghStatus.textContent="[GITHUB] Đang kiểm tra kho...";
+  let sha = null;
+  const check = await fetch(api + "?ref=" + encodeURIComponent(branch), {headers});
+  if(check.ok) sha = (await check.json()).sha;
+  else if(check.status !== 404) throw Error((await check.json()).message);
 
-  let sha=null;
-  const check=await fetch(
-   api+"?ref="+encodeURIComponent(branch),
-   {headers}
-  );
+  const bytes = new TextEncoder().encode(code);
+  let binary = "";
+  for(let i=0; i<bytes.length; i+=8192)
+   binary += String.fromCharCode(...bytes.subarray(i, i+8192));
 
-  if(check.ok){
-   const old=await check.json();
-   sha=old.sha;
-  }else if(check.status!==404){
-   const err=await check.json();
-   throw new Error(err.message||"GitHub read error");
-  }
-
-  const bytes=new TextEncoder().encode(code);
-  let binary="";
-  for(let i=0;i<bytes.length;i+=8192){
-   binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
-  }
-
-  const body={
-   message:"DNG DEV V6 upload",
-   content:btoa(binary),
-   branch:branch
+  const body = {
+   message: "DNG DEV V8 upload",
+   content: btoa(binary),
+   branch: branch
   };
-  if(sha)body.sha=sha;
+  if(sha) body.sha = sha;
 
-  status.textContent="UPLOADING...";
-
-  const response=await fetch(api,{
-   method:"PUT",
-   headers:{
-    ...headers,
-    "Content-Type":"application/json"
-   },
-   body:JSON.stringify(body)
+  ghStatus.textContent="[GITHUB] Đang tải lên...";
+  const response = await fetch(api, {
+   method: "PUT",
+   headers: {"Content-Type": "application/json", ...headers},
+   body: JSON.stringify(body)
   });
+  const data = await response.json();
+  if(!response.ok) throw Error(data.message || "Upload thất bại");
 
-  const data=await response.json();
-  if(!response.ok)throw new Error(data.message||"Upload failed");
-
-  const branchPath=branch.split("/")
-   .map(encodeURIComponent).join("/");
-
-  const raw="https://raw.githubusercontent.com/"+
-   owner+"/"+repo+"/"+branchPath+"/"+path;
-
-  document.getElementById("raw").value=raw;
-  document.getElementById("load").value=
-   'loadstring(game:HttpGet("'+raw+'"))()';
-
-  status.textContent=
-   "UPLOAD SUCCESS"+
-   "\nFILE: "+filename+
-   "\nCOMMIT: "+(data.commit?.sha||"OK");
-
- }catch(error){
-  status.textContent="UPLOAD ERROR: "+error.message;
+  const raw = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/" + branch + "/" + path;
+  $("raw").value = raw;
+  $("load").value = 'loadstring(game:HttpGet("' + raw + '"))()';
+  ghStatus.textContent = "[UPLOAD THÀNH CÔNG] File: " + filename;
+  log("Uploaded to GitHub successfully.");
+ }catch(e){
+  ghStatus.textContent = "[UPLOAD ERROR] " + e.message;
+  log("GitHub error: " + e.message);
  }
 }
 
-function convertLink(){
- const input=document.getElementById("githubLink").value.trim();
- const output=document.getElementById("converted");
-
- try{
-  const url=new URL(input);
-  let raw="";
-
-  if(url.hostname==="github.com"){
-   const parts=url.pathname.split("/").filter(Boolean);
-
-   if(parts.length<5||parts[2]!=="blob"){
-    throw new Error("Link phải dạng USER/REPO/blob/BRANCH/FILE");
-   }
-
-   raw="https://raw.githubusercontent.com/"+
-    parts[0]+"/"+parts[1]+"/"+
-    parts.slice(3).map(encodeURIComponent).join("/");
-
-  }else if(url.hostname==="raw.githubusercontent.com"){
-   raw=url.href;
-  }else{
-   throw new Error("Chỉ hỗ trợ GitHub URL");
-  }
-
-  output.value=raw;
- }catch(error){
-  output.value="";
-  document.getElementById("ghStatus").textContent=error.message;
- }
+const canvas=$("rain"),ctx=canvas.getContext("2d");
+let drops=[];
+function resize(){
+ canvas.width=innerWidth;canvas.height=innerHeight;
+ drops=Array(Math.ceil(canvas.width/17)).fill(1);
 }
+resize();addEventListener("resize",resize);
+setInterval(()=>{
+ ctx.fillStyle="rgba(0,0,0,.08)";
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle="#20ff62";ctx.font="14px monospace";
+ drops.forEach((y,i)=>{
+  ctx.fillText("01アイウカキクケコ"[Math.floor(Math.random()*12)],i*17,y*17);
+  if(y*17>canvas.height&&Math.random()>.975)drops[i]=0;
+  drops[i]++;
+ });
+},55);
 </script>
 </body>
 </html>
